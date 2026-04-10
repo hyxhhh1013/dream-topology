@@ -18,7 +18,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const app = new Hono();
 const corsOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_ORIGIN || '*')
   .split(',')
-  .map((s) => s.trim())
+  .map((s: string) => s.trim())
   .filter(Boolean);
 
 // Middleware
