@@ -1,0 +1,27 @@
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+release/
+
+# Local env
+.env
+.env.local
+.env.development
+
+# Logs
+*.log
+npm-debug.log*
+
+# Databases / temp artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

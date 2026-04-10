@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite doesn't support native Enums, so we use Strings.
+// We can handle the enum logic at the application level.
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  password_hash    String
+  encryption_key   String    // Used for app-level encryption of dream content
+  preferences      String?   // JSON stringified for SQLite
+  
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  deleted_at       DateTime?
+
+  dream_records    DreamRecord[]
+  insight_reports  InsightReport[]
+  tarot_readings   TarotReading[]
+  tarot_favorites  TarotFavorite[]
+
+  @@index([created_at])
+  @@map("users")
+}
+
+model DreamRecord {
+  id                 String    @id @default(uuid())
+  user_id            String
+  content            String    // Encrypted text content
+  emotion            String    @default("NEUTRAL") // App-level Enum
+  recorded_at        DateTime  @default(now())
+  audio_url          String?
+  
+  // Sensations (0-100)
+  vividness          Int       @default(0)
+  terror             Int       @default(0)
+  lucidity           Int       @default(0)
+  
+  // Note: SQLite doesn't support pgvector natively.
+  // For local demo, we store the embedding as a JSON string and perform
+  // similarity calculations in memory (Node.js) or use a lightweight vector lib.
+  content_embedding  String?   
+
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  deleted_at         DateTime?
+
+  user               User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  physiological_data PhysiologicalData?
+  dream_symbols      DreamToSymbol[]
+  source_edges       TopologyEdge[] @relation("SourceDream")
+  target_edges       TopologyEdge[] @relation("TargetDream")
+  tarot_readings     TarotReading[]
+
+  @@index([user_id])
+  @@index([recorded_at])
+  @@map("dream_records")
+}
+
+model PhysiologicalData {
+  id                 String    @id @default(uuid())
+  dream_record_id    String    @unique
+  rem_heart_rate     Int?      // bpm
+  room_temperature   Float?    // Celsius
+  raw_health_data    String?   // JSON stringified for SQLite
+  device_source      String?   // e.g., "apple_watch", "xiaomi_band", "huawei_watch", "garmin"
+
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  dream_record       DreamRecord @relation(fields: [dream_record_id], references: [id], onDelete: Cascade)
+
+  @@map("physiological_data")
+}
+
+model DreamSymbol {
+  id                 String    @id @default(uuid())
+  name               String    @unique // e.g., "water", "maze"
+  universal_meaning  String    // AI generated universal meaning
+  
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  dream_associations DreamToSymbol[]
+
+  @@map("dream_symbols")
+}
+
+model DreamToSymbol {
+  id                 String    @id @default(uuid())
+  dream_record_id    String
+  dream_symbol_id    String
+  personalized_meaning String  // AI personalized interpretation
+
+  created_at         DateTime  @default(now())
+
+  dream_record       DreamRecord @relation(fields: [dream_record_id], references: [id], onDelete: Cascade)
+  dream_symbol       DreamSymbol @relation(fields: [dream_symbol_id], references: [id], onDelete: Cascade)
+
+  @@unique([dream_record_id, dream_symbol_id])
+  @@map("dream_to_symbols")
+}
+
+model TopologyEdge {
+  id                 String    @id @default(uuid())
+  source_id          String
+  target_id          String
+  weight             Float     @default(1.0) // Association strength
+  logic_relation     String?   // e.g., "causality", "similarity"
+
+  created_at         DateTime  @default(now())
+
+  source_dream       DreamRecord @relation("SourceDream", fields: [source_id], references: [id], onDelete: Cascade)
+  target_dream       DreamRecord @relation("TargetDream", fields: [target_id], references: [id], onDelete: Cascade)
+
+  @@index([source_id])
+  @@index([target_id])
+  @@map("topology_edges")
+}
+
+model InsightReport {
+  id                 String    @id @default(uuid())
+  user_id            String
+  report_type        String    // "weekly", "monthly"
+  period_start       DateTime
+  period_end         DateTime
+  summary            String
+  detailed_analysis  String    // JSON stringified for SQLite
+
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  user               User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, period_start, period_end])
+  @@map("insight_reports")
+}
+
+model TarotReading {
+  id                String    @id @default(uuid())
+  user_id           String
+  dream_record_id   String?
+  spread_type       String    @default("three_card")
+  question          String?
+  ai_summary        String
+  ai_interpretation String
+  ai_advice         String?   // JSON stringified string[]
+  created_at        DateTime  @default(now())
+
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  dream_record      DreamRecord? @relation(fields: [dream_record_id], references: [id], onDelete: SetNull)
+  cards             TarotReadingCard[]
+
+  @@index([user_id, created_at])
+  @@map("tarot_readings")
+}
+
+model TarotReadingCard {
+  id               String    @id @default(uuid())
+  tarot_reading_id String
+  position         Int
+  card_code        String
+  card_name        String
+  card_emoji       String?
+  is_reversed      Boolean   @default(false)
+  upright_meaning  String
+  reversed_meaning String
+  created_at       DateTime  @default(now())
+
+  tarot_reading    TarotReading @relation(fields: [tarot_reading_id], references: [id], onDelete: Cascade)
+
+  @@index([tarot_reading_id, position])
+  @@map("tarot_reading_cards")
+}
+
+model TarotFavorite {
+  id          String   @id @default(uuid())
+  user_id     String
+  card_code   String
+  card_name   String
+  card_emoji  String?
+  created_at  DateTime @default(now())
+
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, card_code])
+  @@index([user_id, created_at])
+  @@map("tarot_favorites")
+}
