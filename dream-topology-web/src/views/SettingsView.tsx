@@ -128,56 +128,56 @@ export default function SettingsView() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col h-full gap-6 pb-10"
+      className="flex flex-col h-full gap-4 pb-16 sm:pb-10"
     >
-      <header className="mb-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white transition-colors">设置</h1>
+      <header className="mb-2 sm:mb-4">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white transition-colors">设置</h1>
       </header>
 
       {/* 用户资料卡片 */}
-      <section className="glass-panel rounded-[2rem] p-6 flex items-center justify-between transition-colors border border-black/5 dark:border-white/5 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent">
+      <section className="glass-panel rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 flex items-center justify-between transition-colors border border-black/5 dark:border-white/5 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent">
         {isLoggedIn ? (
           <>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-apple-blue to-apple-purple p-[2px] shadow-md shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-apple-blue to-apple-purple p-[2px] shadow-md shrink-0">
                 <div className="w-full h-full bg-white dark:bg-black rounded-full flex items-center justify-center transition-colors overflow-hidden">
                   {profileAvatar ? (
                     <img src={profileAvatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <User size={24} className="text-gray-400" />
+                    <User size={20} className="text-gray-400" />
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">{userStats.username}</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors font-medium">
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white transition-colors">{userStats.username}</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 transition-colors font-medium">
                   {isLoadingStats ? '加载中...' : `已记录 ${userStats.dreamCount} 个梦境`}
                 </p>
               </div>
             </div>
             <button 
               onClick={() => setShowEditProfile(true)}
-              className="px-4 py-2 bg-black/5 dark:bg-white/10 rounded-full text-sm font-bold text-gray-900 dark:text-white transition-colors hover:bg-black/10 dark:hover:bg-white/20 shrink-0"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-black/5 dark:bg-white/10 rounded-full text-xs sm:text-sm font-bold text-gray-900 dark:text-white transition-colors hover:bg-black/10 dark:hover:bg-white/20 shrink-0"
             >
               编辑
             </button>
           </>
         ) : (
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                <User size={24} className="text-gray-400" />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                <User size={20} className="text-gray-400" />
               </div>
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white transition-colors">未登录</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors font-medium">
-                  登录以同步和备份您的梦境
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white transition-colors">未登录</h2>
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 transition-colors font-medium">
+                  登录以同步和备份梦境
                 </p>
               </div>
             </div>
             <button 
               onClick={() => setShowAuthView(true)}
-              className="px-6 py-2 bg-apple-blue text-white rounded-full text-sm font-bold transition-colors hover:bg-blue-600 shrink-0"
+              className="px-4 sm:px-6 py-1.5 sm:py-2 bg-apple-blue text-white rounded-full text-xs sm:text-sm font-bold transition-colors hover:bg-blue-600 shrink-0"
             >
               登录 / 注册
             </button>
@@ -186,10 +186,10 @@ export default function SettingsView() {
       </section>
 
       {/* 设置列表 */}
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-3 sm:gap-4">
         <SettingsGroup title="数据同步">
           <SettingsItem 
-            icon={<Link2 size={20} className="text-apple-blue" />} 
+            icon={<Link2 size={18} className="text-apple-blue" />} 
             label="多设备数据同步" 
             hasArrow={true}
             onClick={() => setShowDeviceSync(true)}
@@ -198,21 +198,21 @@ export default function SettingsView() {
 
         <SettingsGroup title="偏好与隐私">
           <SettingsItem 
-            icon={<Bell size={20} className="text-orange-500" />} 
+            icon={<Bell size={18} className="text-orange-500" />} 
             label="自愈指南推送" 
             isToggle={true}
             toggleState={guidePush}
             onToggle={setGuidePush}
           />
           <SettingsItem 
-            icon={<Shield size={20} className="text-green-500" />} 
+            icon={<Shield size={18} className="text-green-500" />} 
             label="隐私与安全" 
             hasArrow={true}
             onClick={() => setShowPrivacy(true)}
           />
           <SettingsItem 
-            icon={<Database size={20} className="text-apple-purple" />} 
-            label="查看我的私人潜意识词典" 
+            icon={<Database size={18} className="text-apple-purple" />} 
+            label="私人潜意识词典" 
             hasArrow={true}
             onClick={() => setShowDictionary(true)}
           />
@@ -223,15 +223,15 @@ export default function SettingsView() {
       {isLoggedIn && (
         <button 
           onClick={() => setShowLogoutConfirm(true)}
-          className="mt-4 glass-panel rounded-2xl p-4 flex items-center justify-center gap-2 text-red-600 font-bold transition-colors active:scale-95 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10"
+          className="mt-2 sm:mt-4 glass-panel rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors active:scale-95 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10"
         >
-          <LogOut size={18} />
+          <LogOut size={16} />
           退出登录
         </button>
       )}
       
-      <div className="text-center mt-4">
-        <p className="text-[10px] text-gray-400 uppercase tracking-widest">Dream Topology v1.0 (Hackathon)</p>
+      <div className="text-center mt-2 sm:mt-4">
+        <p className="text-[9px] text-gray-400 uppercase tracking-widest">Dream Topology v1.0 (Hackathon)</p>
       </div>
 
       <AnimatePresence>

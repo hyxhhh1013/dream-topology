@@ -33,6 +33,7 @@ healthRouter.get('/user/dreams', async (c) => {
         content: true,
         emotion: true,
         recorded_at: true,
+        cross_analysis: true,
         dream_symbols: {
           include: {
             dream_symbol: true
@@ -65,7 +66,7 @@ healthRouter.get('/user/dreams', async (c) => {
         content: record.content,
         emotion: record.emotion?.toLowerCase() || 'neutral',
         tags,
-        crossAnalysis: "暂无交叉分析数据"
+        crossAnalysis: record.cross_analysis || ''
       };
     });
 

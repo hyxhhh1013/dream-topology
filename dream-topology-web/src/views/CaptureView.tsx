@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Activity, Thermometer, Info, Sparkles, BrainCircuit, Keyboard, Mic, Loader2 } from 'lucide-react';
+import { Activity, Thermometer, Sparkles, BrainCircuit, Keyboard, Mic, Loader2, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analyzeDream, fetchLocalTemperature } from '../services/api';
 import type { AnalyzeResponse } from '../services/api';
@@ -16,6 +16,7 @@ export default function CaptureView({ onGenerate }: { onGenerate?: (data?: any) 
   const [isRecording, setIsRecording] = useState(false);
   const [dreamText, setDreamText] = useState("");
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
+  const [analysisMode, setAnalysisMode] = useState<'fast' | 'deep'>('fast');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [, setAnalysisResult] = useState<AnalyzeResponse | null>(null);
 
@@ -207,7 +208,7 @@ export default function CaptureView({ onGenerate }: { onGenerate?: (data?: any) 
       };
 
       // 1. Analyze dream to extract symbols, emotion, and cross-analysis
-      const result = await analyzeDream(dreamText, mockPhysiologicalData);
+      const result = await analyzeDream(dreamText, mockPhysiologicalData, analysisMode);
       setAnalysisResult(result);
       
       // 2. Generate embedding (fire and forget for now, or await if needed)
@@ -231,253 +232,314 @@ export default function CaptureView({ onGenerate }: { onGenerate?: (data?: any) 
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="flex flex-col h-full gap-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col gap-4 max-w-5xl mx-auto px-4 pb-24 relative overflow-hidden"
     >
-      <header className="flex justify-between items-end mb-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white transition-colors">梦境拓扑</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 font-medium transition-colors">记录昨晚的潜意识</p>
+      {/* Background Decorative Element */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 bg-apple-purple/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 -left-32 w-80 h-80 bg-apple-blue/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <header className="flex justify-between items-end py-2 relative z-10">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-apple-blue shadow-[0_0_8px_rgba(0,113,227,0.5)]" />
+            <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">梦境拓卜</h1>
+          </div>
+          <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] ml-3.5">Subconscious Signal Capture</p>
+        </div>
+        
+        <div className="relative flex p-1 bg-apple-gray-light/30 dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-black/5 dark:border-white/10 w-fit">
+          <motion.div
+            layoutId="activeTab"
+            className="absolute inset-1 w-[calc(50%-4px)] bg-white dark:bg-[#2c2c2e] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+            initial={false}
+            animate={{ x: inputMode === 'voice' ? 0 : '100%' }}
+            transition={{ type: "spring", stiffness: 500, damping: 40 }}
+          />
+          <button 
+            onClick={() => setInputMode('voice')}
+            className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-xl transition-colors duration-300 ${inputMode === 'voice' ? 'text-apple-blue' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+          >
+            <Mic size={14} className={inputMode === 'voice' ? 'animate-pulse' : ''} />
+            <span className="text-[10px] font-black uppercase tracking-widest">语音</span>
+          </button>
+          <button 
+            onClick={() => setInputMode('text')}
+            className={`relative z-10 flex items-center gap-2 px-4 py-1.5 rounded-xl transition-colors duration-300 ${inputMode === 'text' ? 'text-apple-blue' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+          >
+            <Keyboard size={14} />
+            <span className="text-[10px] font-black uppercase tracking-widest">文字</span>
+          </button>
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row gap-8 flex-1">
-        {/* 左侧：录音/文字输入卡片 */}
-        <section className="glass-panel rounded-[2rem] p-8 flex flex-col items-center justify-center gap-6 relative overflow-hidden transition-colors border border-black/5 dark:border-white/10 shadow-sm dark:shadow-none min-h-[400px] lg:min-h-full flex-1 lg:w-1/2">
-        {/* 输入模式切换 */}
-        <div className="absolute top-4 right-4 z-20 flex bg-black/5 dark:bg-white/10 rounded-full p-1 transition-colors">
-          <button
-            onClick={() => setInputMode('voice')}
-            className={`p-2 rounded-full transition-all duration-300 ${inputMode === 'voice' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
-          >
-            <Mic size={16} />
-          </button>
-          <button
-            onClick={() => setInputMode('text')}
-            className={`p-2 rounded-full transition-all duration-300 ${inputMode === 'text' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
-          >
-            <Keyboard size={16} />
-          </button>
-        </div>
+      <div className="flex flex-col lg:flex-row gap-5 relative z-10">
+        {/* 记录梦境核心区域 */}
+        <section className="flex flex-col gap-4 flex-1 lg:w-[60%]">
+          <div className="group relative glass-panel rounded-[2.5rem] p-5 flex flex-col min-h-[320px] sm:min-h-[380px] bg-white/60 dark:bg-black/20 border border-white/40 dark:border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.03)] dark:shadow-none backdrop-blur-2xl transition-all duration-500 hover:shadow-[0_12px_48px_rgba(0,0,0,0.06)]">
+            
+            {/* Header within card */}
+            <div className="flex items-center justify-between mb-4 px-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-apple-purple/10 flex items-center justify-center text-apple-purple">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <h2 className="text-xs font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">记录梦境</h2>
+                  <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Subconscious Input</p>
+                </div>
+              </div>
 
-        <AnimatePresence mode="wait">
-          {inputMode === 'voice' ? (
-            <motion.div 
-              key="voice"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-              className="relative z-10 w-full text-center mt-4 flex-1 flex flex-col justify-center"
-            >
-              <div className="relative flex items-center justify-center w-32 h-32 mx-auto my-4 group">
-                {/* 简化后的录音波纹特效 */}
-                <AnimatePresence>
-                  {isRecording && (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="absolute inset-0"
-                    >
-                      <div className="absolute inset-[-10px] rounded-full bg-apple-purple/20 animate-siri-wave blur-md" />
-                      <div className="absolute inset-[-20px] rounded-full border border-apple-purple/30 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                {/* 主按钮体 */}
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleRecord}
-                  className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden ${
-                    isRecording 
-                      ? 'shadow-[0_0_30px_rgba(175,82,222,0.3)] dark:shadow-[0_0_40px_rgba(175,82,222,0.4)] border border-black/5 dark:border-white/20' 
-                      : 'bg-black/5 dark:bg-[#2c2c2e] text-gray-700 dark:text-gray-300 shadow-none dark:shadow-sm hover:bg-black/10 dark:hover:bg-[#3a3a3c]'
-                  }`}
+              <div className="relative flex bg-black/5 dark:bg-white/5 rounded-xl p-0.5 border border-black/5 dark:border-white/5">
+                <motion.div
+                  layoutId="analysisTab"
+                  className="absolute inset-0.5 w-[calc(50%-1px)] bg-white dark:bg-[#3a3a3c] rounded-lg shadow-sm"
+                  initial={false}
+                  animate={{ x: analysisMode === 'fast' ? 0 : '100%' }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                />
+                <button
+                  onClick={() => setAnalysisMode('fast')}
+                  className={`relative z-10 px-3 py-1 rounded-lg text-[9px] font-black uppercase transition-colors duration-300 ${analysisMode === 'fast' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
                 >
-                  {/* 录音时的遮罩和流光背景 */}
-                  {isRecording && (
-                    <>
-                      <div className="absolute inset-0 bg-white/80 dark:bg-black/40 backdrop-blur-md transition-colors" />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-apple-blue via-apple-purple to-orange-500 opacity-30 dark:opacity-60 animate-gradient-x mix-blend-multiply dark:mix-blend-overlay" />
-                    </>
-                  )}
-                  {/* 中心图标 */}
-                  <motion.div
-                    animate={isRecording ? { rotate: [0, 5, -5, 0] } : { rotate: 0 }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative z-10"
-                  >
-                    <BrainCircuit 
-                      size={42} 
-                      strokeWidth={isRecording ? 2.5 : 2}
-                      className={`transition-colors duration-300 ${
-                        isRecording ? 'text-apple-purple dark:text-white' : 'text-gray-600 dark:text-gray-300'
-                      }`} 
-                    />
-                  </motion.div>
-                </motion.button>
+                  Fast
+                </button>
+                <button
+                  onClick={() => setAnalysisMode('deep')}
+                  className={`relative z-10 px-3 py-1 rounded-lg text-[9px] font-black uppercase transition-colors duration-300 ${analysisMode === 'deep' ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}
+                >
+                  Deep
+                </button>
               </div>
-              
-              <motion.div
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mt-6"
+            </div>
+
+            {/* Input Content */}
+            <AnimatePresence mode="wait">
+              {inputMode === 'voice' ? (
+                <motion.div 
+                  key="voice"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  className="flex-1 flex flex-col items-center justify-center gap-6 py-4"
+                >
+                  <div className="relative w-28 h-28 flex items-center justify-center">
+                    {/* Organic Waves Animation */}
+                    {isRecording && (
+                      <>
+                        {[1, 2, 3].map((i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute inset-0 rounded-full border-2 border-apple-blue/30"
+                            animate={{ 
+                              scale: [1, 1.8],
+                              opacity: [0.5, 0],
+                            }}
+                            transition={{ 
+                              duration: 2, 
+                              repeat: Infinity, 
+                              delay: i * 0.6,
+                              ease: "easeOut"
+                            }}
+                          />
+                        ))}
+                        <motion.div
+                          className="absolute inset-[-10px] rounded-full bg-apple-blue/5 blur-xl"
+                          animate={{ opacity: [0.3, 0.6, 0.3] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      </>
+                    )}
+                    
+                    <button 
+                      onClick={toggleRecord}
+                      className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-500 active:scale-90 shadow-2xl ${isRecording ? 'bg-red-500 shadow-red-500/30' : 'bg-gradient-to-tr from-apple-blue to-blue-400 shadow-apple-blue/30'}`}
+                    >
+                      {isRecording ? (
+                        <div className="flex gap-1 items-center">
+                          {[1, 2, 3].map(i => (
+                            <motion.div 
+                              key={i}
+                              className="w-1.5 bg-white rounded-full"
+                              animate={{ height: [8, 24, 8] }}
+                              transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <Mic size={32} className="text-white" />
+                      )}
+                    </button>
+                  </div>
+                  
+                  <div className="max-w-sm text-center space-y-2">
+                    <p className={`text-sm font-bold tracking-tight transition-colors duration-300 ${isRecording ? 'text-apple-blue' : 'text-gray-400'}`}>
+                      {isRecording ? "正在捕捉潜意识波形..." : "点击开启信号捕捉"}
+                    </p>
+                    <div className="min-h-[3rem] flex items-center justify-center">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 px-6 italic">
+                        {dreamText || (isRecording ? "" : "“我梦见在一座漂浮的城市里飞行...”")}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="flex-1 flex flex-col relative">
+                  <textarea 
+                    value={dreamText}
+                    onChange={(e) => setDreamText(e.target.value)}
+                    placeholder="在这页纸上写下你记得的所有碎片..."
+                    className="w-full flex-1 bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/20 rounded-[1.5rem] p-5 text-sm leading-relaxed text-gray-900 dark:text-gray-200 focus:outline-none transition-all duration-300 resize-none placeholder-gray-400 dark:placeholder-gray-600 shadow-inner"
+                  />
+                  <div className="absolute bottom-4 right-4 text-[9px] font-black text-gray-400 uppercase tracking-widest pointer-events-none">
+                    {dreamText.length} characters
+                  </div>
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* Transcription Review Area (for voice mode) */}
+            {dreamText && inputMode === 'voice' && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mt-4"
               >
-                <p className={`text-sm font-bold tracking-widest uppercase transition-colors ${
-                  isRecording ? 'text-apple-purple drop-shadow-[0_0_10px_rgba(175,82,222,0.5)]' : 'text-gray-500 dark:text-gray-400'
-                }`}>
-                  {isRecording ? "正在连接潜意识..." : "点击捕获梦境"}
-                </p>
+                <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 border border-black/5 dark:border-white/5">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <div className="w-1 h-1 rounded-full bg-apple-blue" />
+                    信号转换结果
+                  </p>
+                  <textarea 
+                    value={dreamText}
+                    onChange={(e) => setDreamText(e.target.value)}
+                    className="w-full bg-transparent text-[11px] leading-relaxed text-gray-700 dark:text-gray-300 focus:outline-none resize-none min-h-[60px]"
+                  />
+                </div>
               </motion.div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="text"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="w-full relative z-10 mt-8 flex-1 flex flex-col"
-            >
-              <textarea 
-                value={dreamText}
-                onChange={(e) => {
-                  setDreamText(e.target.value);
-                  // if (e.target.value.length > 20) setEmotion('stress'); // Mock emotion detection based on text length
-                }}
-                className="w-full flex-1 bg-black/5 dark:bg-black/40 border border-transparent focus:border-apple-blue/50 rounded-2xl p-5 text-sm leading-relaxed text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-apple-blue/20 resize-none min-h-[180px] transition-all shadow-inner placeholder-gray-400"
-                placeholder="在此输入你记得的梦境细节..."
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {dreamText && inputMode === 'voice' && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="w-full relative z-10"
-          >
-            <textarea 
-              value={dreamText}
-              onChange={(e) => setDreamText(e.target.value)}
-              className="w-full bg-white/60 dark:bg-black/40 border border-black/5 dark:border-white/10 rounded-2xl p-5 text-sm leading-relaxed text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-apple-blue/50 resize-none min-h-[120px] transition-colors shadow-inner"
-              placeholder="你的梦境将显示在这里..."
-            />
-          </motion.div>
-        )}
-
-        <motion.div className="mt-6 flex justify-center">
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: dreamText && !isAnalyzing ? 1.05 : 1 }}
-            whileTap={{ scale: dreamText && !isAnalyzing ? 0.95 : 1 }}
-            onClick={handleGenerate}
-            disabled={!dreamText || isAnalyzing}
-            className={`px-8 py-3 rounded-full flex items-center gap-2 transition-all duration-300 shadow-md text-sm font-semibold tracking-wide ${
-              dreamText && !isAnalyzing
-                ? 'shadow-apple-blue/20 bg-gradient-to-r from-apple-blue to-blue-500 text-white hover:shadow-lg hover:shadow-apple-blue/30' 
-                : 'bg-black/5 dark:bg-white/5 text-gray-400 dark:text-gray-500 cursor-not-allowed border border-transparent dark:border-white/5'
-            }`}
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                正在解析潜意识...
-              </>
-            ) : (
-              <>
-                生成拓扑解析
-                <Sparkles size={16} className={dreamText ? "animate-pulse" : ""} />
-              </>
             )}
-          </motion.button>
-        </motion.div>
-      </section>
 
-      {/* 右侧：数据与体感评估 */}
-      <div className="flex flex-col gap-8 flex-1 lg:w-1/2">
-        {/* 生理体征回填 (Device Health Mock) */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-gray-700 dark:text-gray-400 uppercase tracking-widest transition-colors">昨晚睡眠数据</h2>
-              <Info size={14} className="text-gray-500 dark:text-gray-500 transition-colors" />
-            </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/5 dark:bg-white/10">
-              <Activity size={12} className="text-apple-blue" />
-              <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">多设备协同同步</span>
-            </div>
+            <button 
+              onClick={handleGenerate}
+              disabled={isAnalyzing || !dreamText.trim()}
+              className="group relative w-full mt-5 h-12 rounded-2xl overflow-hidden shadow-[0_10px_20px_-5px_rgba(0,113,227,0.3)] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale disabled:scale-100"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-apple-purple via-apple-blue to-apple-purple bg-[length:200%_auto] animate-gradient-x" />
+              <div className="relative flex items-center justify-center gap-2.5 text-white font-black text-xs uppercase tracking-[0.2em]">
+                {isAnalyzing ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <BrainCircuit size={16} className="group-hover:rotate-12 transition-transform duration-500" />
+                )}
+                {isAnalyzing ? '拓扑网络绘制中...' : '生成拓扑解析'}
+              </div>
+            </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="glass-panel rounded-3xl p-5 flex flex-col gap-2 transition-colors relative overflow-hidden group border border-black/10 dark:border-white/5 bg-white dark:bg-transparent">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-apple-blue/10 rounded-full blur-2xl group-hover:bg-apple-blue/20 transition-colors" />
-              <div className="flex items-center gap-2 text-apple-blue relative z-10">
-                <Activity size={18} />
-                <span className="text-xs font-semibold uppercase tracking-wider">REM心率</span>
+        </section>
+
+        {/* 侧边数据卡片 */}
+        <section className="flex flex-col gap-4 lg:w-[40%]">
+          {/* Physiological Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="glass-panel rounded-3xl p-4 bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500">
+                  <Activity size={12} />
+                </div>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">REM心率</span>
               </div>
-              <div className="flex items-baseline gap-1 relative z-10">
-                <span className="text-3xl font-bold text-gray-900 dark:text-white transition-colors tracking-tighter">85</span>
-                <span className="text-xs text-gray-600 font-medium">bpm</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">85</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase">bpm</span>
               </div>
-              <p className="text-[10px] text-red-600 dark:text-red-400 mt-1 transition-colors font-medium">↑ 偏高 (+15%)</p>
+              <div className="mt-2 w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '70%' }}
+                  className="h-full bg-red-500/60 rounded-full"
+                />
+              </div>
             </div>
 
-            <div className="glass-panel rounded-3xl p-5 flex flex-col gap-2 transition-colors relative overflow-hidden group border border-black/10 dark:border-white/5 bg-white dark:bg-transparent">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors" />
-              <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 relative z-10 transition-colors">
-                <Thermometer size={18} />
-                <span className="text-xs font-semibold uppercase tracking-wider">环境温度</span>
+            <div className="glass-panel rounded-3xl p-4 bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500">
+                  <Thermometer size={12} />
+                </div>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">体感温度</span>
               </div>
-              <div className="flex items-baseline gap-1 relative z-10">
+              <div className="flex items-baseline gap-1">
                 {isTempLoading ? (
-                  <Loader2 size={24} className="animate-spin text-orange-400 mt-1" />
+                  <Loader2 size={14} className="animate-spin text-gray-300" />
                 ) : (
                   <>
-                    <span className="text-3xl font-bold text-gray-900 dark:text-white transition-colors tracking-tighter">
-                      {localTemp !== null ? localTemp.toFixed(1) : '24.5'}
-                    </span>
-                    <span className="text-xs text-gray-600 font-medium">°C</span>
+                    <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{localTemp?.toFixed(1) || '24.5'}</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">°C</span>
                   </>
                 )}
               </div>
-              <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-1 transition-colors font-medium">
-                {isTempLoading ? '定位中...' : (localTemp && localTemp > 26 ? '环境偏热' : localTemp && localTemp < 20 ? '环境偏冷' : '温度适宜')}
+              <div className="mt-2 w-full h-1 bg-black/5 dark:bg-white/10 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: '45%' }}
+                  className="h-full bg-orange-500/60 rounded-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Real-time Mapping */}
+          <div className="glass-panel rounded-[2rem] p-6 bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 shadow-sm flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <div className="space-y-0.5">
+                <h3 className="text-[10px] font-black text-gray-800 dark:text-gray-200 uppercase tracking-widest">实时体感映射</h3>
+                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Real-time Physical Feedback</p>
+              </div>
+              <div className="w-8 h-8 rounded-xl bg-apple-blue/10 flex items-center justify-center text-apple-blue">
+                <Activity size={16} />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <CompactSlider label="清晰度" value={vividness} color="bg-gradient-to-r from-blue-400 to-apple-blue" icon="👁️" />
+              <CompactSlider label="惊悚感" value={terror} color="bg-gradient-to-r from-red-400 to-red-600" icon="🌑" />
+              <CompactSlider label="控制力" value={lucidity} color="bg-gradient-to-r from-emerald-400 to-emerald-600" icon="🧘" />
+            </div>
+
+            <div className="mt-8 p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Info size={10} className="text-gray-400" />
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">解析提示</span>
+              </div>
+              <p className="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
+                系统正根据你的描述深度推演脑电波频率与情绪载荷，这些指标将作为拓扑网络的核心权重。
               </p>
             </div>
           </div>
         </section>
-
-        {/* 多维体感评估 */}
-        <section className="mb-8 flex-1 flex flex-col">
-          <h2 className="text-sm font-bold text-gray-700 dark:text-gray-400 uppercase tracking-widest mb-3 transition-colors">体感评估</h2>
-          <div className="glass-panel rounded-3xl p-6 flex flex-col justify-center gap-6 transition-colors border border-black/10 dark:border-white/5 shadow-sm dark:shadow-none bg-white dark:bg-transparent flex-1">
-            <Slider label="生动度 (Vividness)" value={vividness} gradient="bg-gradient-to-r from-cyan-400 to-blue-500" />
-            <Slider label="惊悚度 (Terror)" value={terror} gradient="bg-gradient-to-r from-purple-400 to-purple-600" />
-            <Slider label="清醒度 (Lucidity)" value={lucidity} gradient="bg-gradient-to-r from-gray-400 to-gray-500" />
-          </div>
-        </section>
-      </div>
       </div>
     </motion.div>
   );
 }
 
-function Slider({ label, value, gradient }: { label: string; value: number; gradient: string }) {
+function CompactSlider({ label, value, color, icon }: { label: string, value: number, color: string, icon?: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex justify-between text-xs font-medium">
-        <span className="text-gray-700 dark:text-gray-300 transition-colors">{label}</span>
-        <span className="text-gray-500">{value}/100</span>
+      <div className="flex justify-between items-center px-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{icon}</span>
+          <span className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">{label}</span>
+        </div>
+        <span className="text-[10px] font-black text-apple-blue">{value}%</span>
       </div>
-      <div className="w-full h-3 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden shadow-inner transition-colors p-[2px]">
-        <div className={`h-full ${gradient} rounded-full shadow-sm`} style={{ width: `${value}%` }} />
+      <div className="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden border border-black/5 dark:border-white/5 shadow-inner">
+        <motion.div 
+          initial={{ width: 0 }}
+          animate={{ width: `${value}%` }}
+          className={`h-full ${color} rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
+          transition={{ type: "spring", stiffness: 50, damping: 20 }}
+        />
       </div>
     </div>
   );

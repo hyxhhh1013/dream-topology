@@ -26,18 +26,19 @@ const analyzeSchema = z.object({
     heartRate: z.number().optional(),
     temperature: z.number().optional(),
   }).optional(),
+  mode: z.enum(['fast', 'deep']).optional(),
 });
 
 const SYSTEM_PROMPT = `
 你是一位专业的荣格与弗洛伊德流派心理分析师、梦境解析专家。
 你的任务是从用户提供的梦境描述和（如果提供的话）睡眠时的生理数据（如心率、温度）中，提取出核心的“梦境符号”，并进行深度心理学原型的解构。同时，请评估这个梦境的整体情绪，并结合生理数据给出一份详尽的交叉验证分析报告。
 
-请严格以 JSON 格式返回结果，包含 "emotion"、"symbols"、"cross_analysis"、"insights"、"scientific_basis"、"immersive_reflection" 六个字段：
+请严格以 JSON 格式返回结果，包含 "emotion"、"symbols"、"cross_analysis"、"insights"、"overall_archetype" 五个字段：
 - "emotion": 梦境的整体情绪分类（必须从以下选项中选择一个："HAPPY", "SAD", "ANGRY", "FEAR", "NEUTRAL", "ANXIETY", "PEACEFUL", "CONFUSION"）
-- "symbols": 符号数组。每个符号包含以下字段：
+- "symbols": 符号数组（最多 6 个，按重要性排序）。每个符号包含以下字段：
   - "name": 符号名称（如：“坠落”、“考试”、“无面人”、“蛇”、“火”）
   - "category": 符号分类（可选值：物体 Object、动作 Action、人物 Character、环境 Environment）
-  - "archetype_meaning": 经典心理学原型释义。请给出非常详细、专业且深刻的长篇分析（约 150-300 字），基于荣格或弗洛伊德理论，解释该符号代表的深层潜意识机制（例如：阴影、阿尼玛、自性、俄狄浦斯情结等）。请不要吝啬字数，尽可能展开论述该符号在心理动力学上的意义，以及它如何与梦者的现实境遇产生联结。
+  - "archetype_meaning": 经典心理学原型释义（约 80-160 字），基于荣格或弗洛伊德理论，解释该符号的潜意识机制，并点明其与现实处境的可能联系。
   - "culture_tag": 文化或普遍心理标签（如：“现代社会焦虑”、“集体潜意识恐惧”、“自我重构”）
   - "symbol_emotion": 该符号在梦境中通常投射的潜在情绪（如：“惊恐”、“压抑”、“渴望”、“平静”）
 - "overall_archetype": 整个梦境的主导心理原型名称（格式：中文名称(英文名)，例如："阿尼玛(Anima)"，"阴影(Shadow)"，"自性(Self)" 等）。
@@ -45,60 +46,28 @@ const SYSTEM_PROMPT = `
   - "coreTheme": 核心洞察主题（极简的一句话，如：“高应激预警：身份认同焦虑”）
   - "interpretation": 针对梦境核心的深度解释（一两句话总结）
   - "actionableAdvice": 包含 2-3 条具体的行动建议的数组（例如："睡前将空调温度下调至 24°C-26°C"，"尝试 10 分钟身体扫描冥想"）
-- "scientific_basis": 科学依据模块，包含以下字段：
-  - "confidence": 0-100 的整型置信度（基于梦境信息完整度与生理数据一致性）
-  - "coreHypothesis": 一句话核心假设（例如：“高唤醒状态下的威胁模拟梦”）
-  - "evidenceMap": 数组，至少 3 条，每条包含：
-    - "observation": 观察到的梦境或生理线索
-    - "inference": 由线索推导出的心理机制
-    - "strength": 证据强度（"HIGH" | "MEDIUM" | "LOW"）
-  - "limitations": 数组，1-2 条，说明推断边界与不确定性
-- "immersive_reflection": 帮助用户“有切身体会”的代入式描述（120-220 字），用第二人称，聚焦身体感觉、注意焦点与当下可执行的自我安抚动作。
-- "cross_analysis": 一份详尽的综合分析报告（约 200-300 字）。必须包含以下三个结构化段落（使用换行符 \n\n 分隔）：
+- "cross_analysis": 一份综合分析报告（约 140-220 字）。必须包含以下三个结构化段落（使用换行符 \n\n 分隔）：
   1. 生理-心理映射：详细解释梦境中的高潮片段如何与提供的生理数据（如心率波动、体温变化）相呼应。如果未提供生理数据，则推测梦境可能引发的躯体反应。
   2. 潜意识深层动机：基于荣格或弗洛伊德理论，深挖梦境核心冲突的现实根源（如被压抑的欲望、未解决的创伤、身份认同危机）。
   3. 现实觉知建议：给出 1-2 条切实可行的心理建议或生活调整方向，帮助用户在清醒状态下整合这段潜意识体验。
+`;
 
-示例输出格式：
-{
-  "emotion": "FEAR",
-  "overall_archetype": "阴影(Shadow)",
-  "insights": {
-    "coreTheme": "高应激预警：被压抑的焦虑爆发",
-    "interpretation": "梦境中被火追赶指向潜意识深处的冲突。这通常出现在高强度工作周期或你在现实中极力逃避某项重大责任时。",
-    "actionableAdvice": [
-      "环境调节：睡前调整室内温度，保持卧室通风。",
-      "心理阻断：尝试 10 分钟身体扫描冥想，平复自主神经系统。"
-    ]
-  },
-  "symbols": [
-    {
-      "name": "被火追赶",
-      "category": "动作",
-      "archetype_meaning": "在荣格心理学中，火是极具双重性的符号，既象征着毁灭的狂暴力量，也代表着炼金术般的转化与重生。被火追赶通常意味着你正在被自身潜意识中压抑的强烈情绪（如未表达的愤怒、嫉妒或激烈的欲望）所反噬。这股力量由于未被意识接纳，化作了梦境中的威胁者，逼迫你直面内心的‘阴影’。这种压抑往往源于现实生活中为了维持‘人格面具’（Persona，即社会期望的良好形象）而做出的妥协。当你极力表现得温和、顺从时，内心积压的攻击性便会在梦境中以烈火的形式爆发。此外，火也具有净化的作用，这场追逐或许是潜意识在提示你，旧的自我认知模式已经不再适用，你必须经历一场痛苦的心理淬炼，烧毁那些束缚你的教条，才能实现自性的完整与重生。",
-      "culture_tag": "高压应激",
-      "symbol_emotion": "极度焦虑"
-    }
-  ],
-  "cross_analysis": "【生理-心理映射】\\n梦境中被火追赶的意象与记录到的 REM 期高心率 (85bpm) 和略微升高的体温 (28.5°C) 高度吻合。这表明在梦境发生时，你的自主神经系统被完全激活，进入了经典的“战斗或逃跑”状态。躯体的炎热感可能直接投射为了梦中的“火”，而高心率则强化了被追赶的紧迫感。\\n\\n【潜意识深层动机】\\n在荣格心理学中，“火”不仅是毁灭的象征，更是转化的能量。那团追赶你的火，很可能是你在现实生活中一直试图逃避的某种强烈情绪（如愤怒、压抑的激情或巨大的工作压力）。它之所以紧追不舍，是因为你的潜意识正在强迫你面对这种需要被整合的心理阴影（Shadow）。\\n\\n【现实觉知建议】\\n建议在接下来的几天里，觉察自己是否在某些关系或任务中积压了过多的情绪。你可以尝试在睡前进行 10 分钟的降温冥想，或者通过书写将内心的焦虑具象化，变被动逃跑为主动面对。"
-},
-"scientific_basis": {
-  "confidence": 82,
-  "coreHypothesis": "高唤醒状态下的威胁模拟梦",
-  "evidenceMap": [
-    { "observation": "梦中持续被追赶", "inference": "威胁监测系统持续激活", "strength": "HIGH" }
-  ],
-  "limitations": ["缺少连续多晚生理数据，结论需动态复核"]
-},
-"immersive_reflection": "当你再次回想这个梦，先把注意力放在脚底与呼吸..."
-}
+const SYSTEM_PROMPT_FAST = `
+你是一位专业的荣格与弗洛伊德流派心理分析师、梦境解析专家。
+请严格以 JSON 格式返回结果，包含 "emotion"、"symbols"、"cross_analysis"、"insights"、"overall_archetype" 五个字段：
+- "emotion": 必须从："HAPPY", "SAD", "ANGRY", "FEAR", "NEUTRAL", "ANXIETY", "PEACEFUL", "CONFUSION" 中选择
+- "symbols": 最多 4 个，按重要性排序；每个包含 name/category/archetype_meaning(40-90字)/culture_tag/symbol_emotion
+- "overall_archetype": 中文名称(英文名)
+- "insights": coreTheme/interpretation/actionableAdvice(2条)
+- "cross_analysis": 3 段（用 \\n\\n 分隔），总字数 90-140 字
 `;
 
 function normalizeAnalyzeResult(parsedData: any, physiologicalData?: { heartRate?: number; temperature?: number }) {
   const safeEmotion = typeof parsedData?.emotion === 'string' ? parsedData.emotion : 'NEUTRAL';
-  const safeSymbols = Array.isArray(parsedData?.symbols) ? parsedData.symbols : [];
+  const safeSymbols = Array.isArray(parsedData?.symbols) ? parsedData.symbols.slice(0, 6) : [];
   const safeInsights = parsedData?.insights || {};
   const safeScientific = parsedData?.scientific_basis || {};
+  const safeCross = typeof parsedData?.cross_analysis === 'string' ? parsedData.cross_analysis.trim() : '';
 
   const confidence = Number.isFinite(safeScientific?.confidence)
     ? Math.max(0, Math.min(100, Math.round(safeScientific.confidence)))
@@ -124,10 +93,17 @@ function normalizeAnalyzeResult(parsedData: any, physiologicalData?: { heartRate
         }
       ];
 
+  const fallbackCross = safeCross || [
+    `【生理-心理映射】\n${physiologicalData?.heartRate ? `心率 ${physiologicalData.heartRate} bpm 提示较高唤醒水平，` : ''}${physiologicalData?.temperature ? `体温 ${physiologicalData.temperature}°C 可能放大不适感，` : ''}梦境中的紧迫与迷失更容易被躯体反应强化。`,
+    `【潜意识深层动机】\n高频的“被困/迷路/追逐”等意象通常指向现实中的压力与控制感下降，潜意识用情境化符号让你意识到需要面对的核心冲突。`,
+    `【现实觉知建议】\n睡前做 3-5 分钟缓呼吸与放松；白天把近期最焦虑的事项写成清单并拆分成可执行步骤，降低夜间唤醒。`
+  ].join('\n\n');
+
   return {
     ...parsedData,
     emotion: safeEmotion,
     symbols: safeSymbols,
+    cross_analysis: fallbackCross,
     insights: {
       coreTheme: safeInsights?.coreTheme || '潜意识冲突信号',
       interpretation: safeInsights?.interpretation || '你的梦境反映了近期压力与内在需求之间的拉扯。',
@@ -149,6 +125,22 @@ function normalizeAnalyzeResult(parsedData: any, physiologicalData?: { heartRate
   };
 }
 
+function parseModelJson(content: string) {
+  try {
+    return JSON.parse(content);
+  } catch {
+  }
+
+  const start = content.indexOf('{');
+  const end = content.lastIndexOf('}');
+  if (start !== -1 && end !== -1 && end > start) {
+    const sliced = content.slice(start, end + 1);
+    return JSON.parse(sliced);
+  }
+
+  return JSON.parse(content);
+}
+
 // Helper to get userId from header or fallback
 function getUserId(c: any): string {
   const headerUserId = c.req.header('x-user-id')?.trim();
@@ -167,7 +159,26 @@ aiRouter.post('/analyze', async (c) => {
       return c.json({ error: 'Invalid input', details: result.error.issues }, 400);
     }
     
-    const { dreamText, physiologicalData } = result.data;
+    const { dreamText, physiologicalData, mode } = result.data;
+    const userId = getUserId(c);
+
+    const cached = await prisma.dreamRecord.findFirst({
+      where: {
+        user_id: userId,
+        content: dreamText,
+        deleted_at: null,
+        analysis_result: { not: null },
+      },
+      orderBy: { created_at: 'desc' },
+      select: { analysis_result: true }
+    });
+
+    if (cached?.analysis_result) {
+      try {
+        return c.json({ data: JSON.parse(cached.analysis_result) });
+      } catch {
+      }
+    }
     
     let userMessage = `这是我的梦境：\n${dreamText}`;
     if (physiologicalData) {
@@ -177,11 +188,12 @@ aiRouter.post('/analyze', async (c) => {
     const response = await openai.chat.completions.create({
       model: 'deepseek-chat', // 使用 DeepSeek 的模型
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: mode === 'deep' ? SYSTEM_PROMPT : SYSTEM_PROMPT_FAST },
         { role: 'user', content: userMessage }
       ],
       response_format: { type: 'json_object' },
       temperature: 0.3,
+      max_tokens: mode === 'deep' ? 1500 : 1200,
     });
     
     const content = response.choices[0]?.message?.content;
@@ -190,13 +202,12 @@ aiRouter.post('/analyze', async (c) => {
       throw new Error('No content returned from OpenAI');
     }
     
-    const parsedData = normalizeAnalyzeResult(JSON.parse(content), physiologicalData);
+    const parsedData = normalizeAnalyzeResult(parseModelJson(content), physiologicalData);
     
     // Create DreamRecord in database
     let dreamRecordId = null;
     try {
       // Ensure user exists
-      const userId = getUserId(c);
       let user = await prisma.user.findFirst({
         where: { id: userId }
       });
@@ -218,9 +229,8 @@ aiRouter.post('/analyze', async (c) => {
           user_id: user.id,
           content: dreamText,
           emotion: parsedData.emotion || 'NEUTRAL',
-          // Storing analysis result in DB isn't strictly in schema as a column anymore?
-          // Wait, if it isn't, we just skip it or store it elsewhere. 
-          // The schema has `emotion`, `content`, `recorded_at`
+          analysis_result: JSON.stringify(parsedData),
+          cross_analysis: parsedData.cross_analysis || null,
         }
       });
       dreamRecordId = newRecord.id;
@@ -398,16 +408,29 @@ aiRouter.get('/symbols', async (c) => {
 aiRouter.post('/generate-image', async (c) => {
   try {
     const body = await c.req.json();
-    const { prompt, dreamId } = body;
+    const { prompt, dreamId, style } = body;
     
     if (!prompt) {
       return c.json({ error: 'Missing prompt' }, 400);
     }
+
+    // Define style prompts
+    const stylePrompts: Record<string, string> = {
+      'surrealism': 'Create a dreamlike, surrealistic illustration. The style should be mysterious, psychological, and visually striking, similar to Carl Jung\'s Red Book or surrealist paintings.',
+      'cyberpunk': 'Create a futuristic, cyberpunk style illustration with neon lights, high-tech elements, and a dark, moody atmosphere.',
+      'watercolor': 'Create a soft, ethereal watercolor painting with fluid colors, gentle textures, and a poetic, dreamlike quality.',
+      'oil_painting': 'Create a rich, textured oil painting with visible brushstrokes, deep colors, and a classic, expressive fine art style.',
+      'anime': 'Create a high-quality Japanese anime style illustration, similar to Makoto Shinkai or Studio Ghibli, with beautiful lighting and emotional atmosphere.',
+      'sketch': 'Create a detailed charcoal or pencil sketch with expressive lines, shading, and a raw, psychological feel.'
+    };
+
+    const selectedStylePrompt = stylePrompts[style] || stylePrompts['surrealism'];
+    const finalPrompt = `${selectedStylePrompt} Based on this dream description: ${prompt}`;
     
     // 1. Generate image using Zhipu AI (CogView)
     const response = await zhipuai.images.generate({
       model: "cogview-3", // 智谱的文生图模型
-      prompt: `Create a dreamlike, surrealistic illustration based on the following dream description. The style should be mysterious, psychological, and visually striking, similar to Carl Jung's Red Book or surrealist paintings: ${prompt}`,
+      prompt: finalPrompt,
       n: 1,
       size: "1024x1024",
     });

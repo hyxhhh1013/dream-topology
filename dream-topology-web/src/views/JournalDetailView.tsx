@@ -25,6 +25,16 @@ export default function JournalDetailView({ onBack, onUpdate, title: initialTitl
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
+  const [selectedStyle, setSelectedStyle] = useState('surrealism');
+
+  const styles = [
+    { id: 'surrealism', name: '超现实主义', icon: '🌌' },
+    { id: 'cyberpunk', name: '赛博朋克', icon: '🏙️' },
+    { id: 'watercolor', name: '梦幻水彩', icon: '🎨' },
+    { id: 'oil_painting', name: '古典油画', icon: '🖌️' },
+    { id: 'anime', name: '二次元', icon: '🌸' },
+    { id: 'sketch', name: '心理素描', icon: '✏️' }
+  ];
 
   const handleSave = () => {
     setIsEditing(false);
@@ -66,7 +76,7 @@ export default function JournalDetailView({ onBack, onUpdate, title: initialTitl
     
     setIsGeneratingImage(true);
     try {
-      const imageUrl = await generateDreamImage(content);
+      const imageUrl = await generateDreamImage(content, undefined, selectedStyle);
       setDreamImage(imageUrl);
     } catch (error) {
       console.error("Failed to generate image:", error);
@@ -171,17 +181,44 @@ export default function JournalDetailView({ onBack, onUpdate, title: initialTitl
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">梦境画卷</h2>
-              {!dreamImage && (
+            </div>
+            
+            {!dreamImage && (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">选择艺术风格</p>
+                  <span className="text-[10px] text-apple-blue font-bold">{styles.find(s => s.id === selectedStyle)?.name}</span>
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+                  {styles.map((style) => (
+                    <button
+                      key={style.id}
+                      onClick={() => setSelectedStyle(style.id)}
+                      className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        selectedStyle === style.id 
+                          ? 'bg-apple-blue/10 border-apple-blue text-apple-blue shadow-sm' 
+                          : 'bg-black/5 dark:bg-white/5 border-transparent text-gray-500 hover:bg-black/10'
+                      }`}
+                    >
+                      <span>{style.icon}</span>
+                      <span>{style.name}</span>
+                    </button>
+                  ))}
+                </div>
                 <button 
                   onClick={handleGenerateImage}
                   disabled={isGeneratingImage}
-                  className="flex items-center gap-1.5 text-xs font-bold text-apple-blue bg-apple-blue/10 px-3 py-1.5 rounded-full hover:bg-apple-blue/20 transition-colors"
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-apple-purple to-apple-blue text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-apple-blue/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale"
                 >
-                  {isGeneratingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
-                  {isGeneratingImage ? '正在生成中...' : '生成画卷'}
+                  {isGeneratingImage ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <ImageIcon size={18} />
+                  )}
+                  {isGeneratingImage ? '正在绘制潜意识...' : '生成梦境画卷'}
                 </button>
-              )}
-            </div>
+              </div>
+            )}
             
             {dreamImage && (
               <motion.div 

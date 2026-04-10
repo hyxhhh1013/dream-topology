@@ -175,7 +175,7 @@ tarotRouter.post('/draw', async (c) => {
           response_format: { type: 'json_object' },
           temperature: 0.6,
         }),
-        8000
+        15000
       );
       const content = response.choices[0]?.message?.content;
       if (content) {

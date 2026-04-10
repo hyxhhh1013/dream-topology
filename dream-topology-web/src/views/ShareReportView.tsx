@@ -128,13 +128,13 @@ export default function ShareReportView({ onBack, title, date, content, emotion,
 
             <div className="bg-white/10 border border-white/15 rounded-2xl p-4">
               <p className="text-white/70 text-[11px] font-bold tracking-widest">梦境内容</p>
-              <p className="text-white/95 text-sm leading-relaxed mt-2 whitespace-pre-wrap">{content}</p>
+              <p className="text-white/95 text-sm leading-relaxed mt-2 line-clamp-6">{content}</p>
             </div>
 
             {crossAnalysis && (
               <div className="bg-white/10 border border-white/15 rounded-2xl p-4">
                 <p className="text-white/70 text-[11px] font-bold tracking-widest">AI 综合洞察</p>
-                <p className="text-white/95 text-sm leading-relaxed mt-2 whitespace-pre-wrap">
+                <p className="text-white/95 text-sm leading-relaxed mt-2 line-clamp-8">
                   {crossAnalysis}
                 </p>
               </div>

@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Sparkles, Loader2, Share2, Heart, History, BookMarked } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import {
@@ -18,6 +18,72 @@ type TarotViewProps = {
   emotion?: string;
 };
 
+// Sub-component for individual card with flip animation
+function TarotCardItem({ card, favorited, onToggleFavorite, index }: { card: TarotReadingCard, favorited: boolean, onToggleFavorite: (card: TarotReadingCard) => void, index: number }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFlipped(true);
+    }, 500 + index * 400);
+    return () => clearTimeout(timer);
+  }, [index]);
+
+  return (
+    <div className="perspective-1000 w-full aspect-[2/3] max-h-[220px] sm:max-h-[320px]">
+      <motion.div
+        className="relative w-full h-full transition-all duration-700 preserve-3d"
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+      >
+        {/* Card Back */}
+        <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl border border-apple-blue/30 bg-gradient-to-br from-[#1A1D29] to-[#0B0D14] flex flex-col items-center justify-center p-2 shadow-lg">
+          <div className="w-full h-full rounded-lg border border-apple-blue/10 flex flex-col items-center justify-center overflow-hidden relative">
+            <Sparkles size={16} className="text-apple-blue/40" />
+          </div>
+        </div>
+
+        {/* Card Front */}
+        <div className="absolute inset-0 w-full h-full backface-hidden rounded-xl border border-white/10 bg-white dark:bg-[#1C1D26] flex flex-col p-3 shadow-xl overflow-hidden" style={{ transform: 'rotateY(180deg)' }}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[8px] font-black text-apple-blue uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-apple-blue/5">
+              P{card.position}
+            </span>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(card);
+              }} 
+              className={`${favorited ? 'text-red-500' : 'text-gray-300 dark:text-gray-600'} transition-all`}
+            >
+              <Heart size={14} fill={favorited ? 'currentColor' : 'none'} />
+            </button>
+          </div>
+          
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <p className="text-3xl sm:text-5xl mb-1 drop-shadow-sm">
+              {card.card_emoji || '🔮'}
+            </p>
+            <h3 className="text-xs sm:text-lg font-black text-gray-900 dark:text-white tracking-tight leading-tight truncate w-full">
+              {card.card_name}
+            </h3>
+            <span className={`mt-1 text-[7px] sm:text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${card.is_reversed ? 'text-orange-500 bg-orange-500/10' : 'text-emerald-500 bg-emerald-500/10'}`}>
+              {card.is_reversed ? 'Rev' : 'Up'}
+            </span>
+          </div>
+
+          {/* Mobile meaning - more compact */}
+          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-white/5 hidden sm:block">
+            <p className="text-[10px] leading-tight text-gray-600 dark:text-gray-400">
+              {card.is_reversed ? card.reversed_meaning.substring(0, 30) + '...' : card.upright_meaning.substring(0, 30) + '...'}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps) {
   const [question, setQuestion] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -32,6 +98,7 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
 
   const handleDraw = async () => {
     setIsDrawing(true);
+    setReading(null); // Clear previous result to trigger animations
     try {
       const result = await drawTarot({
         dreamText,
@@ -39,12 +106,14 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
         question: question.trim() || undefined,
         spreadType: 'three_card',
       });
-      setReading(result);
-      setActiveTab('draw');
+      // Add a slight delay to let the shuffling animation feel substantial
+      setTimeout(() => {
+        setReading(result);
+        setIsDrawing(false);
+      }, 1500);
     } catch (error) {
       console.error(error);
       alert('抽牌失败，请确认后端是否正常运行。');
-    } finally {
       setIsDrawing(false);
     }
   };
@@ -127,173 +196,314 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
       transition={{ type: 'spring', damping: 25, stiffness: 220 }}
       className="fixed inset-0 z-[80] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
     >
-      <div className="max-w-3xl mx-auto min-h-screen px-4 sm:px-6 pt-8 sm:pt-10 pb-28 relative">
-        <div className="absolute top-0 left-0 w-72 h-72 bg-apple-purple/15 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute top-20 right-0 w-72 h-72 bg-apple-blue/15 blur-3xl rounded-full pointer-events-none" />
-        <header className="flex items-center justify-between sticky top-0 py-3 bg-apple-gray-light/75 dark:bg-apple-black/75 backdrop-blur-xl z-10">
-          <button onClick={onBack} className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5">
-            <ChevronLeft size={20} />
+      {/* Persistant Background Glows */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-apple-purple/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-apple-blue/10 blur-[120px] rounded-full animate-pulse animation-delay-2000" />
+      </div>
+
+      <div className="max-w-4xl mx-auto min-h-screen px-4 sm:px-8 pt-4 sm:pt-12 pb-20 relative z-10">
+        <header className="flex items-center justify-between sticky top-0 py-3 bg-apple-gray-light/75 dark:bg-apple-black/75 backdrop-blur-xl z-20 -mx-4 px-4 sm:-mx-8 sm:px-8">
+          <button onClick={onBack} className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all">
+            <ChevronLeft size={18} />
           </button>
-          <h2 className="font-bold tracking-widest text-gray-900 dark:text-white">梦境联动塔罗</h2>
-          <button onClick={shareImage} disabled={!reading || isSharing} className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-apple-blue disabled:opacity-50 hover:bg-black/5 dark:hover:bg-white/5">
-            {isSharing ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
+          <div className="flex flex-col items-center">
+            <h2 className="font-black tracking-[0.2em] text-gray-900 dark:text-white uppercase text-xs sm:text-sm">梦境塔罗</h2>
+            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Dream Divination</span>
+          </div>
+          <button onClick={shareImage} disabled={!reading || isSharing} className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-apple-blue disabled:opacity-50 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all">
+            {isSharing ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
           </button>
         </header>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 p-1 bg-black/5 dark:bg-white/5 rounded-2xl">
-          <button onClick={() => setActiveTab('draw')} className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === 'draw' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-700 dark:text-gray-300'}`}>
+        <nav className="flex gap-1 p-1 bg-black/5 dark:bg-white/5 rounded-xl mt-4">
+          <button onClick={() => setActiveTab('draw')} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'draw' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
             抽牌
           </button>
-          <button onClick={loadHistory} className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1 sm:gap-2 transition-all ${activeTab === 'history' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-700 dark:text-gray-300'}`}>
-            <History size={13} /> 历史
+          <button onClick={loadHistory} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'history' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
+            <History size={12} /> 历史
           </button>
-          <button onClick={loadFavorites} className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1 sm:gap-2 transition-all ${activeTab === 'favorites' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-700 dark:text-gray-300'}`}>
-            <BookMarked size={13} /> 收藏
+          <button onClick={loadFavorites} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'favorites' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
+            <BookMarked size={12} /> 收藏
           </button>
-        </div>
+        </nav>
 
         {activeTab === 'draw' && (
-          <section className="mt-5 flex flex-col gap-4">
-            <div className="glass-panel rounded-3xl p-5 bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10">
-              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest">提问（可选）</p>
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="例如：我该如何面对最近的人际焦虑？"
-                className="w-full mt-2 min-h-[90px] rounded-2xl bg-black/5 dark:bg-black/30 border border-black/5 dark:border-white/10 p-3 text-sm text-gray-800 dark:text-gray-200"
-              />
-              <button onClick={handleDraw} disabled={isDrawing} className="mt-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-apple-purple to-apple-blue text-white text-sm font-bold disabled:opacity-60 flex items-center gap-2">
-                {isDrawing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                {isDrawing ? '正在抽牌...' : '抽三张牌'}
-              </button>
+          <section className="mt-3 flex flex-col gap-3">
+            <div className="glass-panel rounded-2xl p-3 bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 shadow-sm">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Sparkles size={12} className="text-apple-purple" />
+                <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">潜意识提问</p>
+              </div>
+              <div className="relative">
+                <textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="想问潜意识什么？"
+                  className="w-full min-h-[50px] rounded-xl bg-black/5 dark:bg-black/30 border border-transparent focus:border-apple-blue/30 focus:bg-white dark:focus:bg-black/50 p-2.5 text-xs text-gray-800 dark:text-gray-200 outline-none transition-all placeholder-gray-400 resize-none"
+                />
+                <button 
+                  onClick={handleDraw} 
+                  disabled={isDrawing} 
+                  className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-gradient-to-r from-apple-purple to-apple-blue text-white disabled:opacity-60 flex items-center justify-center shadow-lg active:scale-90 transition-all"
+                >
+                  {isDrawing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                </button>
+              </div>
             </div>
 
-            {reading && (
-              <div className="glass-panel rounded-3xl p-5 bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10">
-                <p className="text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400">过去 · 现在 · 未来</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                  {reading.cards.map((card) => {
-                    const favorited = favoriteCodes.has(card.card_code);
-                    return (
-                      <div key={card.id} className="rounded-2xl p-4 bg-gradient-to-b from-[#F7FAFF] to-white dark:from-[#1A1D29] dark:to-[#11141F] border border-[#DCE6FF] dark:border-white/10 shadow-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-gray-500">第{card.position}张</span>
-                          <button onClick={() => handleToggleFavorite(card)} className={`${favorited ? 'text-red-500' : 'text-gray-400'} transition-colors`}>
-                            <Heart size={15} fill={favorited ? 'currentColor' : 'none'} />
-                          </button>
-                        </div>
-                        <p className="text-3xl mt-2">{card.card_emoji || '🔮'}</p>
-                        <p className="text-lg font-bold mt-1 text-gray-900 dark:text-white">{card.card_name}</p>
-                        <p className={`text-xs mt-1 font-bold ${card.is_reversed ? 'text-orange-500' : 'text-emerald-500'}`}>
-                          {card.is_reversed ? '逆位' : '正位'}
-                        </p>
-                        <p className="text-xs mt-2 text-gray-600 dark:text-gray-300 leading-5">
-                          {card.is_reversed ? card.reversed_meaning : card.upright_meaning}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-4 rounded-2xl p-4 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">结论：{reading.ai_summary}</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-7 mt-2">{reading.ai_interpretation}</p>
-                  {!!reading.evidence?.length && (
-                    <div className="mt-3 space-y-2">
-                      <p className="text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400">解读依据</p>
-                      {reading.evidence.map((e, i) => (
-                        <div key={`evidence-${i}`} className="rounded-xl bg-white/70 dark:bg-white/5 border border-black/5 dark:border-white/10 p-3">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{i + 1}. {e.point}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">牌面依据：{e.card_basis}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">梦境依据：{e.dream_basis}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-3 space-y-2">
-                    {reading.advice.map((a, i) => (
-                      <p key={i} className="text-sm text-gray-700 dark:text-gray-300">• {a}</p>
+            <AnimatePresence mode="wait">
+              {isDrawing && !reading && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="flex flex-col items-center justify-center py-8 gap-4"
+                >
+                  <div className="relative w-20 h-30 flex items-center justify-center">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-full h-full rounded-xl border border-apple-blue/20 bg-[#0B0D14]"
+                        animate={{ 
+                          x: [0, (i - 1) * 25, 0],
+                          rotate: [0, (i - 1) * 8, 0],
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
+                      />
                     ))}
                   </div>
-                </div>
-              </div>
-            )}
+                  <p className="text-[9px] font-black text-apple-blue animate-pulse tracking-widest uppercase">Connecting...</p>
+                </motion.div>
+              )}
+
+              {reading && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex flex-col gap-4"
+                >
+                  {/* Card Spread Area - Three in a row on mobile */}
+                  <div className="flex flex-col gap-2">
+                    <div className="grid grid-cols-3 gap-2">
+                      {reading.cards.map((card, idx) => (
+                        <TarotCardItem 
+                          key={card.id} 
+                          card={card} 
+                          index={idx}
+                          favorited={favoriteCodes.has(card.card_code)}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* AI Interpretation Area - Compact */}
+                  <div className="glass-panel rounded-2xl p-4 bg-gradient-to-br from-white/90 to-[#F7FAFF] dark:from-[#1C1D26]/90 dark:to-[#111218] border border-apple-blue/10 shadow-lg">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-apple-blue/10 flex items-center justify-center shrink-0">
+                        <Sparkles size={16} className="text-apple-blue" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-black text-gray-900 dark:text-white truncate">{reading.ai_summary}</h4>
+                        <p className="text-[9px] text-apple-blue font-bold uppercase tracking-widest mt-0.5">AI Insights</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed font-medium bg-black/5 dark:bg-white/5 p-3 rounded-xl italic">
+                      "{reading.ai_interpretation}"
+                    </p>
+
+                    {!!reading.advice?.length && (
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {reading.advice.map((a, i) => (
+                          <div key={i} className="px-2.5 py-1 rounded-lg bg-apple-purple/5 border border-apple-purple/10 text-apple-purple text-[9px] font-bold flex items-center gap-1">
+                            <div className="w-1 h-1 rounded-full bg-apple-purple" />
+                            {a}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
         )}
 
         {activeTab === 'history' && (
-          <section className="mt-5 space-y-3">
-            {history.length === 0 && <p className="text-gray-500 text-sm">暂无历史记录</p>}
+          <section className="mt-8 space-y-4">
+            {history.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
+                <History size={40} className="opacity-20" />
+                <p className="text-sm font-bold tracking-widest uppercase">暂无历史记录</p>
+              </div>
+            )}
             {history.map((item) => (
-              <button key={item.id} onClick={() => { setReading(item); setActiveTab('draw'); }} className="w-full text-left rounded-2xl p-4 glass-panel bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10">
-                <p className="text-xs text-gray-500">{new Date(item.created_at).toLocaleString()}</p>
-                <p className="text-sm font-bold mt-1 text-gray-900 dark:text-white">{item.ai_summary}</p>
-                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{item.cards.map(c => `${c.card_name}${c.is_reversed ? '(逆)' : '(正)'}`).join(' · ')}</p>
+              <button key={item.id} onClick={() => { setReading(item); setActiveTab('draw'); }} className="w-full text-left rounded-3xl p-5 glass-panel bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 group hover:border-apple-blue/30 transition-all active:scale-[0.98]">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(item.created_at).toLocaleString()}</p>
+                  <div className="flex gap-1">
+                    {item.cards.map(c => (
+                      <span key={c.id} className="text-sm grayscale group-hover:grayscale-0 transition-all">{c.card_emoji}</span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-base font-black text-gray-900 dark:text-white tracking-tight">{item.ai_summary}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.cards.map(c => (
+                    <span key={c.id} className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">
+                      {c.card_name}{c.is_reversed ? '(逆)' : ''}
+                    </span>
+                  ))}
+                </div>
               </button>
             ))}
           </section>
         )}
 
         {activeTab === 'favorites' && (
-          <section className="mt-5 grid grid-cols-2 md:grid-cols-3 gap-3">
-            {favorites.length === 0 && <p className="text-gray-500 text-sm col-span-full">暂无收藏牌</p>}
+          <section className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {favorites.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
+                <BookMarked size={40} className="opacity-20" />
+                <p className="text-sm font-bold tracking-widest uppercase">暂无收藏牌</p>
+              </div>
+            )}
             {favorites.map((f) => (
-              <div key={f.id} className="rounded-2xl p-4 glass-panel bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10">
-                <p className="text-2xl">{f.card_emoji || '🔮'}</p>
-                <p className="text-sm font-bold mt-1 text-gray-900 dark:text-white">{f.card_name}</p>
-                <p className="text-[11px] text-gray-500 mt-1">{f.card_code}</p>
+              <div key={f.id} className="rounded-3xl p-5 glass-panel bg-white dark:bg-[#1C1D26] border border-black/5 dark:border-white/10 flex flex-col items-center text-center gap-2">
+                <p className="text-4xl mb-1">{f.card_emoji || '🔮'}</p>
+                <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight">{f.card_name}</p>
+                <p className="text-[9px] font-black text-apple-blue uppercase tracking-widest bg-apple-blue/5 px-2 py-0.5 rounded-full">{f.card_code}</p>
               </div>
             ))}
           </section>
         )}
       </div>
 
+      {/* Share Export Hidden Area - Refined for better image generation */}
       <div className="fixed -left-[99999px] top-0 pointer-events-none">
-        <div ref={exportRef} className="w-[1080px] p-14 bg-gradient-to-b from-[#F8FAFF] to-[#EEF3FF] text-[#1D2333]">
-          <div className="rounded-[30px] bg-white border border-[#DEE6FF] p-10 shadow-[0_20px_60px_rgba(71,89,162,0.12)]">
-            <p className="text-[13px] tracking-[0.22em] font-semibold text-[#6D78A8]">DREAM TAROT REPORT</p>
-            <h1 className="text-[42px] font-black mt-2">三张牌阵解读</h1>
-            {reading && (
-              <>
-                <div className="grid grid-cols-3 gap-4 mt-8">
-                  {reading.cards.map((card) => (
-                    <div key={`share-${card.id}`} className="rounded-2xl border border-[#E3E9FF] bg-[#F9FBFF] p-4">
-                      <p className="text-4xl">{card.card_emoji || '🔮'}</p>
-                      <p className="text-lg font-bold mt-2">{card.card_name}</p>
-                      <p className="text-sm mt-1">{card.is_reversed ? '逆位' : '正位'}</p>
-                    </div>
-                  ))}
+        <div ref={exportRef} className="w-[1080px] p-16 bg-[#F6F8FF] text-[#1D2333] font-sans">
+          <div className="rounded-[40px] bg-white border border-[#DEE6FF] p-12 shadow-[0_30px_80px_rgba(71,89,162,0.12)] relative overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E3E9FF] blur-[100px] rounded-full opacity-50 -translate-y-1/2 translate-x-1/2" />
+            
+            <div className="relative z-10">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-[14px] tracking-[0.3em] font-black text-[#6D78A8] uppercase">Dream Divination Report</p>
+                  <h1 className="text-[52px] font-black mt-3 tracking-tighter text-[#1A1D2E]">塔罗牌阵解读</h1>
                 </div>
-                <div className="mt-8 rounded-2xl border border-[#E3E9FF] p-5">
-                  <p className="text-sm font-bold tracking-wider text-[#68749A]">结论</p>
-                  <p className="text-xl font-bold mt-2 text-[#2C3B77]">{reading.ai_summary}</p>
-                  <p className="text-[17px] leading-8 mt-3">{reading.ai_interpretation}</p>
-                  {!!reading.evidence?.length && (
-                    <div className="mt-4 space-y-3">
-                      <p className="text-sm font-bold tracking-wider text-[#68749A]">解读依据</p>
-                      {reading.evidence.slice(0, 3).map((e, idx) => (
-                        <div key={`share-evidence-${idx}`} className="rounded-xl border border-[#E9EEFF] bg-[#FAFCFF] p-3">
-                          <p className="text-[15px] font-semibold">{idx + 1}. {e.point}</p>
-                          <p className="text-[13px] mt-1 text-[#4F5D86]">牌面依据：{e.card_basis}</p>
-                          <p className="text-[13px] mt-1 text-[#4F5D86]">梦境依据：{e.dream_basis}</p>
+                <div className="w-20 h-20 rounded-3xl bg-[#F0F4FF] flex items-center justify-center border border-[#DEE6FF]">
+                  <span className="text-4xl">🌌</span>
+                </div>
+              </div>
+
+              {reading && (
+                <>
+                  <div className="grid grid-cols-3 gap-6 mt-12">
+                    {reading.cards.map((card) => (
+                      <div key={`share-${card.id}`} className="rounded-[2rem] border-2 border-[#E3E9FF] bg-white p-6 shadow-sm flex flex-col items-center text-center">
+                        <p className="text-6xl mb-4">{card.card_emoji || '🔮'}</p>
+                        <p className="text-2xl font-black text-[#1A1D2E]">{card.card_name}</p>
+                        <p className={`text-sm mt-2 font-black uppercase tracking-widest ${card.is_reversed ? 'text-orange-500' : 'text-emerald-500'}`}>
+                          {card.is_reversed ? '逆位 (Reversed)' : '正位 (Upright)'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-12 space-y-8">
+                    <div className="p-8 rounded-[2.5rem] bg-[#F9FBFF] border border-[#E3E9FF]">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-2 h-6 bg-apple-blue rounded-full" />
+                        <p className="text-lg font-black text-[#68749A] uppercase tracking-widest">潜意识洞察结论</p>
+                      </div>
+                      <p className="text-3xl font-black text-[#2C3B77] leading-tight">{reading.ai_summary}</p>
+                      <p className="text-[20px] leading-relaxed mt-6 text-[#4A5578] font-medium border-l-4 border-[#DEE6FF] pl-6 py-2">
+                        {reading.ai_interpretation}
+                      </p>
+                    </div>
+
+                    {!!reading.evidence?.length && (
+                      <div className="grid grid-cols-1 gap-4">
+                        <p className="text-sm font-black text-[#68749A] uppercase tracking-[0.3em] ml-2">Evidence Map / 解读依据</p>
+                        {reading.evidence.slice(0, 3).map((e, idx) => (
+                          <div key={`share-evidence-${idx}`} className="rounded-3xl border border-[#E9EEFF] bg-white p-6 flex flex-col gap-4">
+                            <p className="text-[18px] font-black text-[#1A1D2E] flex items-center gap-3">
+                              <span className="w-7 h-7 rounded-full bg-[#DEE6FF] text-[#2C3B77] flex items-center justify-center text-xs">{idx + 1}</span>
+                              {e.point}
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-[#F9FBFF] p-4 rounded-2xl">
+                                <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mb-2">牌面依据</p>
+                                <p className="text-[14px] text-[#4A5578] leading-normal">{e.card_basis}</p>
+                              </div>
+                              <div className="bg-[#F9FBFF] p-4 rounded-2xl">
+                                <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mb-2">梦境依据</p>
+                                <p className="text-[14px] text-[#4A5578] leading-normal">{e.dream_basis}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {!!reading.advice?.length && (
+                      <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#2C3B77] to-[#1A1D2E] text-white">
+                        <p className="text-sm font-black text-white/50 uppercase tracking-[0.3em] mb-6">Advice / 行动建议</p>
+                        <div className="flex flex-wrap gap-3">
+                          {reading.advice.map((advice, idx) => (
+                            <div key={`share-advice-${idx}`} className="px-6 py-3 rounded-2xl bg-white/10 border border-white/10 text-lg font-bold flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full bg-apple-blue" />
+                              {advice}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  {!!reading.advice?.length && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-sm font-bold tracking-wider text-[#68749A]">行动建议</p>
-                      {reading.advice.map((advice, idx) => (
-                        <p key={`share-advice-${idx}`} className="text-[15px] leading-7">• {advice}</p>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className="mt-16 pt-8 border-t border-[#DEE6FF] flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-apple-blue flex items-center justify-center">
+                    <span className="text-2xl">🌌</span>
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-[#1A1D2E] leading-none">梦境拓卜</p>
+                    <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mt-1">Dream Topology v1.0</p>
+                  </div>
                 </div>
-              </>
-            )}
+                <div className="text-right">
+                  <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-[0.2em]">Captured on</p>
+                  <p className="text-sm font-bold text-[#1A1D2E] mt-1">{new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .preserve-3d {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </motion.div>
   );
 }

@@ -114,11 +114,15 @@ export interface TarotFavorite {
 /**
  * 1. 语义解构 API：提取梦境符号与情绪，支持传入生理数据进行交叉验证
  */
-export async function analyzeDream(dreamText: string, physiologicalData?: PhysiologicalData): Promise<AnalyzeResponse> {
+export async function analyzeDream(
+  dreamText: string,
+  physiologicalData?: PhysiologicalData,
+  mode?: 'fast' | 'deep'
+): Promise<AnalyzeResponse> {
   const response = await fetch(`${API_BASE_URL}/ai/analyze`, {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify({ dreamText, physiologicalData })
+    body: JSON.stringify({ dreamText, physiologicalData, mode })
   });
   
   if (!response.ok) {
@@ -169,11 +173,11 @@ export async function findSimilarDreams(targetEmbedding: number[], topK: number 
 /**
  * 4. AIGC 绘图：生成梦境画卷
  */
-export async function generateDreamImage(prompt: string): Promise<string> {
+export async function generateDreamImage(prompt: string, dreamId?: string, style?: string): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/ai/generate-image`, {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify({ prompt })
+    body: JSON.stringify({ prompt, dreamId, style })
   });
   
   if (!response.ok) {
