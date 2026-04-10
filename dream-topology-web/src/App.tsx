@@ -136,7 +136,7 @@ function App() {
       {/* Apple 风格导航栏 (Mobile: Bottom, Desktop: Left Side) */}
       <nav className={`fixed z-50 transition-all duration-300 glass-panel bg-white/78 dark:bg-[#1c1c1e]/72 shadow-[0_8px_28px_rgba(0,0,0,0.08)] dark:shadow-none
         bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.25rem)] max-w-md py-2 px-3 rounded-2xl border
-        md:rounded-none md:bottom-auto md:left-0 md:translate-x-0 md:w-24 md:h-screen md:py-12 md:px-0 md:border-t-0 md:border-r md:flex md:flex-col
+        md:rounded-none md:top-0 md:bottom-0 md:left-0 md:translate-x-0 md:w-24 md:h-screen md:py-12 md:px-0 md:border-t-0 md:border-r md:flex md:flex-col
         ${isMobileNavVisible ? 'translate-y-0 opacity-100' : 'translate-y-[105%] opacity-0 pointer-events-none'}
         md:translate-y-0 md:opacity-100 md:pointer-events-auto
         ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
