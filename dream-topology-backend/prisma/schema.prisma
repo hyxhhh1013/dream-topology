@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,7 +16,7 @@ model User {
   name             String?
   password_hash    String
   encryption_key   String    // Used for app-level encryption of dream content
-  preferences      String?   // JSON stringified for SQLite
+  preferences      String?   @db.Text
   
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
@@ -34,20 +34,19 @@ model User {
 model DreamRecord {
   id                 String    @id @default(uuid())
   user_id            String
-  content            String    // Encrypted text content
+  content            String    @db.Text
   emotion            String    @default("NEUTRAL") // App-level Enum
   recorded_at        DateTime  @default(now())
   audio_url          String?
+  analysis_result    String?   @db.Text
+  cross_analysis     String?   @db.Text
   
   // Sensations (0-100)
   vividness          Int       @default(0)
   terror             Int       @default(0)
   lucidity           Int       @default(0)
   
-  // Note: SQLite doesn't support pgvector natively.
-  // For local demo, we store the embedding as a JSON string and perform
-  // similarity calculations in memory (Node.js) or use a lightweight vector lib.
-  content_embedding  String?   
+  content_embedding  String?   @db.Text
 
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -70,7 +69,7 @@ model PhysiologicalData {
   dream_record_id    String    @unique
   rem_heart_rate     Int?      // bpm
   room_temperature   Float?    // Celsius
-  raw_health_data    String?   // JSON stringified for SQLite
+  raw_health_data    String?   @db.Text
   device_source      String?   // e.g., "apple_watch", "xiaomi_band", "huawei_watch", "garmin"
 
   created_at         DateTime  @default(now())
@@ -83,8 +82,8 @@ model PhysiologicalData {
 
 model DreamSymbol {
   id                 String    @id @default(uuid())
-  name               String    @unique // e.g., "water", "maze"
-  universal_meaning  String    // AI generated universal meaning
+  name               String    @unique @db.VarChar(255)
+  universal_meaning  String    @db.Text
   
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -98,7 +97,7 @@ model DreamToSymbol {
   id                 String    @id @default(uuid())
   dream_record_id    String
   dream_symbol_id    String
-  personalized_meaning String  // AI personalized interpretation
+  personalized_meaning String  @db.Text
 
   created_at         DateTime  @default(now())
 
@@ -132,8 +131,8 @@ model InsightReport {
   report_type        String    // "weekly", "monthly"
   period_start       DateTime
   period_end         DateTime
-  summary            String
-  detailed_analysis  String    // JSON stringified for SQLite
+  summary            String    @db.Text
+  detailed_analysis  String    @db.Text
 
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -149,10 +148,10 @@ model TarotReading {
   user_id           String
   dream_record_id   String?
   spread_type       String    @default("three_card")
-  question          String?
+  question          String?   @db.Text
   ai_summary        String
-  ai_interpretation String
-  ai_advice         String?   // JSON stringified string[]
+  ai_interpretation String    @db.Text
+  ai_advice         String?   @db.Text
   created_at        DateTime  @default(now())
 
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -171,8 +170,8 @@ model TarotReadingCard {
   card_name        String
   card_emoji       String?
   is_reversed      Boolean   @default(false)
-  upright_meaning  String
-  reversed_meaning String
+  upright_meaning  String    @db.Text
+  reversed_meaning String    @db.Text
   created_at       DateTime  @default(now())
 
   tarot_reading    TarotReading @relation(fields: [tarot_reading_id], references: [id], onDelete: Cascade)

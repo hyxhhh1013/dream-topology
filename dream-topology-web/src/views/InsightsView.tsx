@@ -128,26 +128,26 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col h-full gap-6 pb-10"
+      className="flex flex-col h-full gap-4 pb-16 sm:pb-10"
     >
-      <header className="flex justify-between items-end mb-4">
+      <header className="flex justify-between items-end mb-2 sm:mb-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white transition-colors">洞察</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1 transition-colors">探索你的潜意识百科</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white transition-colors">洞察</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-0.5 sm:mt-1 transition-colors">探索你的潜意识百科</p>
         </div>
       </header>
 
       {/* 顶部标签切换 */}
-      <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-2xl transition-colors">
+      <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-xl sm:rounded-2xl transition-colors">
         <button 
           onClick={() => setActiveTab('stats')}
-          className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all duration-300 ${activeTab === 'stats' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 hover:text-gray-800 dark:hover:text-gray-300'}`}
+          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'stats' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
         >
           数据统计
         </button>
         <button 
           onClick={() => setActiveTab('journal')}
-          className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all duration-300 ${activeTab === 'journal' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 hover:text-gray-800 dark:hover:text-gray-300'}`}
+          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'journal' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
         >
           梦境日记
         </button>
@@ -161,54 +161,54 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 sm:gap-6"
           >
             {/* 核心统计卡片 */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="glass-panel rounded-3xl p-5 flex flex-col gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
-                <div className="w-10 h-10 rounded-full bg-apple-blue/10 dark:bg-apple-blue/20 flex items-center justify-center text-apple-blue group-hover:scale-110 transition-transform">
-                  <TrendingUp size={20} />
+            <section className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/10 dark:bg-apple-blue/20 flex items-center justify-center text-apple-blue group-hover:scale-110 transition-transform">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider transition-colors">月度高频符号</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 transition-colors truncate max-w-[150px] sm:max-w-[180px]" title={recentSymbols.length > 0 ? recentSymbols.map(s => s.name).join(' / ') : '迷宫 / 坠落'}>
+                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider transition-colors">月度高频符号</p>
+                  <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white mt-0.5 sm:mt-1 transition-colors truncate" title={recentSymbols.length > 0 ? recentSymbols.map(s => s.name).join(' / ') : '迷宫 / 坠落'}>
                     {recentSymbols.length > 0 
                       ? recentSymbols.map(s => s.name).join(' / ') 
                       : '迷宫 / 坠落'}
                   </p>
                 </div>
               </div>
-              <div className="glass-panel rounded-3xl p-5 flex flex-col gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
-                <div className="w-10 h-10 rounded-full bg-apple-purple/10 dark:bg-apple-purple/20 flex items-center justify-center text-apple-purple group-hover:scale-110 transition-transform">
-                  <Sparkles size={20} />
+              <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-purple/10 dark:bg-apple-purple/20 flex items-center justify-center text-apple-purple group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 font-bold uppercase tracking-wider transition-colors">主导心理原型</p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white mt-1 transition-colors flex items-baseline">
-                    <span className="truncate max-w-[120px] sm:max-w-[150px]" title={dreamData && dreamData.analysis && dreamData.analysis.overall_archetype ? dreamData.analysis.overall_archetype : '阿尼玛'}>
+                  <p className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider transition-colors">主导心理原型</p>
+                  <p className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white mt-0.5 sm:mt-1 transition-colors flex items-baseline">
+                    <span className="truncate" title={dreamData && dreamData.analysis && dreamData.analysis.overall_archetype ? dreamData.analysis.overall_archetype : '阿尼玛'}>
                       {dreamData && dreamData.analysis && dreamData.analysis.overall_archetype
                         ? dreamData.analysis.overall_archetype.split('（')[0].split('(')[0] // 兼容中英文括号
                         : '阿尼玛'} 
                     </span>
-                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2 shrink-0">45%</span>
+                    <span className="text-[10px] sm:text-sm font-normal text-gray-500 dark:text-gray-400 ml-1.5 shrink-0">45%</span>
                   </p>
                 </div>
               </div>
             </section>
 
             {/* 符号百科列表 */}
-            <section className="flex flex-col gap-4">
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors">最近解析的符号</h2>
+            <section className="flex flex-col gap-3 sm:gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white transition-colors">最近解析的符号</h2>
                 <button 
                   onClick={() => setShowDictionary(true)}
-                  className="text-xs text-apple-blue font-bold hover:opacity-80 transition-opacity"
+                  className="text-[10px] sm:text-xs text-apple-blue font-bold hover:opacity-80 transition-opacity"
                 >
                   查看全部
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch">
                 {recentSymbols.length > 0 ? (
                   recentSymbols.map((symbol: any, idx: number) => (
                     <SymbolCard 
@@ -233,7 +233,7 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                     />
                   ))
                 ) : (
-                  <div className="col-span-1 md:col-span-2 py-10 flex justify-center text-gray-500">
+                  <div className="col-span-1 md:col-span-2 py-8 flex justify-center text-gray-500 text-xs sm:text-sm">
                     暂无符号记录，快去解析一个梦境吧！
                   </div>
                 )}
@@ -242,30 +242,30 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
 
             {/* 自愈指南推送 */}
             {showGuide && (
-              <section className="mt-2">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors">专属自愈指南</h2>
+              <section className="mt-1">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 transition-colors">专属自愈指南</h2>
                 <motion.div 
                   whileHover={{ scale: 1.01 }}
-                  className="glass-panel rounded-3xl p-6 relative overflow-hidden transition-colors border border-apple-purple/30 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent"
+                  className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden transition-colors border border-apple-purple/30 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-apple-purple/20 blur-3xl rounded-full" />
+                  <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-apple-purple/20 blur-3xl rounded-full" />
                   
-                  <div className="relative z-10 flex flex-col gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-blue text-white flex items-center justify-center shadow-lg shadow-apple-purple/40">
-                        <BookOpen size={20} />
+                  <div className="relative z-10 flex flex-col gap-3 sm:gap-4">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-blue text-white flex items-center justify-center shadow-lg shadow-apple-purple/40">
+                        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
-                      <div>
-                        <h3 className="font-bold text-gray-900 dark:text-white transition-colors text-base">{guideData.title}</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 transition-colors font-medium mt-0.5 pr-2">{guideData.desc}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-gray-900 dark:text-white transition-colors text-sm sm:text-base truncate">{guideData.title}</h3>
+                        <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 transition-colors font-medium mt-0.5 pr-2 truncate sm:whitespace-normal">{guideData.desc}</p>
                       </div>
                     </div>
                     
                     <button 
                       onClick={() => setShowMeditation(true)}
-                      className="w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-2xl font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md hover:opacity-90"
+                      className="w-full py-2.5 sm:py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md hover:opacity-90"
                     >
-                      开始今日练习 <ChevronRight size={16} />
+                      开始今日练习 <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                 </motion.div>
@@ -279,22 +279,22 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-3 sm:gap-4"
           >
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors">所有记录</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white transition-colors">所有记录</h2>
               <button 
                 onClick={() => setShowCalendar(true)}
-                className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
               >
-                <CalendarDays size={16} />
+                <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
 
             {/* 日记列表项 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 items-stretch">
               {isLoadingDreams ? (
-                <div className="col-span-1 md:col-span-2 py-10 flex justify-center text-gray-500">
+                <div className="col-span-1 md:col-span-2 py-8 flex justify-center text-gray-500 text-xs sm:text-sm">
                   加载中...
                 </div>
               ) : allDreams.length > 0 ? (
@@ -314,19 +314,19 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                         content: dream.content, 
                         emotion: dream.emotion, 
                         tags: dream.tags,
-                        crossAnalysis: dream.crossAnalysis || '' // add cross analysis if it exists
+                        crossAnalysis: dream.crossAnalysis || dream.cross_analysis || '暂无交叉分析数据'
                       })}
                   />
                 ))
               ) : (
-                <div className="col-span-1 md:col-span-2 py-10 flex justify-center text-gray-500">
+                <div className="col-span-1 md:col-span-2 py-8 flex justify-center text-gray-500 text-xs sm:text-sm">
                   暂无梦境记录
                 </div>
               )}
             </div>
             
-            <div className="mt-4 text-center">
-              <button className="text-sm font-bold text-gray-400 hover:text-apple-blue transition-colors">
+            <div className="mt-2 sm:mt-4 text-center">
+              <button className="text-[10px] sm:text-sm font-bold text-gray-400 hover:text-apple-blue transition-colors">
                 加载更多历史记录
               </button>
             </div>
