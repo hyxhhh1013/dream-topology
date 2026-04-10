@@ -89,7 +89,9 @@ export default function SettingsView() {
         
         const currentUser = JSON.parse(currentUserStr);
         const userId = currentUser.id;
-        const remoteStats = await getUserStats();
+        const remoteDreamCount = await getUserStats()
+          .then((stats) => stats?.dreamCount)
+          .catch(() => undefined);
 
         // Try to load saved profile data from local storage for this specific user
         const savedProfile = localStorage.getItem(`dream_topology_profile_${userId}`);
@@ -97,7 +99,7 @@ export default function SettingsView() {
         if (savedProfile) {
           const profile = JSON.parse(savedProfile);
           setUserStats({
-            dreamCount: remoteStats?.dreamCount ?? profile.dreamCount ?? 0,
+            dreamCount: remoteDreamCount ?? profile.dreamCount ?? 0,
             username: profile.username || currentUser.username,
             email: profile.email || currentUser.email
           });
@@ -107,9 +109,9 @@ export default function SettingsView() {
         } else {
           // Default fallback if no profile saved yet
           setUserStats({
-            dreamCount: remoteStats?.dreamCount ?? 0,
-            username: remoteStats?.username || currentUser.username,
-            email: remoteStats?.email || currentUser.email
+            dreamCount: remoteDreamCount ?? 0,
+            username: currentUser.username,
+            email: currentUser.email
           });
         }
       } catch (error) {
