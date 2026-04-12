@@ -207,7 +207,7 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
       <header className="flex justify-between items-center mb-1">
         <button 
           onClick={onBack}
-          className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+          className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14 shadow-sm"
         >
           <ChevronLeft size={18} />
         </button>
@@ -215,14 +215,14 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
         <div className="flex items-center gap-1.5">
           <button
             onClick={onOpenTarot}
-            className="h-9 px-2.5 rounded-full glass-panel flex items-center justify-center gap-1 text-purple-600 dark:text-purple-300 transition-colors shadow-sm hover:bg-black/5 dark:hover:bg-white/5"
+            className="h-9 px-2.5 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center gap-1 text-apple-blue dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14 shadow-sm"
           >
             <WandSparkles size={14} />
             <span className="text-[10px] sm:text-xs font-bold">塔罗</span>
           </button>
           <button 
             onClick={handleShare}
-            className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-apple-blue transition-colors shadow-sm hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50"
+            className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-apple-blue dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14 disabled:opacity-50 shadow-sm"
             aria-label="分享报告"
             aria-busy={isSharing}
           >
@@ -232,11 +232,11 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
       </header>
 
       {/* 极简拓扑图区域 */}
-      <section className="relative w-full h-[300px] sm:h-[350px] lg:h-[500px] flex items-center justify-center my-2 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-white to-[#EEF3FF] dark:from-[#1A1A24] dark:to-[#0D0D14] shadow-inner border border-black/5 dark:border-white/5 overflow-hidden">
+      <section className="relative w-full h-[300px] sm:h-[350px] lg:h-[500px] flex items-center justify-center my-2 rounded-2xl sm:rounded-3xl bg-white dark:bg-[#1C1E21] shadow-inner border border-black/5 dark:border-white/10 overflow-hidden">
         {/* 背景光效 */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[20%] left-[20%] w-48 sm:w-64 h-48 sm:h-64 bg-purple-400/20 dark:bg-purple-500/10 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen" />
-          <div className="absolute bottom-[20%] right-[20%] w-48 sm:w-64 h-48 sm:h-64 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen" />
+          <div className="absolute top-[18%] left-[18%] w-48 sm:w-64 h-48 sm:h-64 bg-apple-blue/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-[18%] right-[18%] w-48 sm:w-64 h-48 sm:h-64 bg-apple-blue/10 rounded-full blur-3xl" />
         </div>
 
         {/* 极简连接线 */}
@@ -278,12 +278,9 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           <div className="relative group cursor-pointer">
-            {/* 核心光晕 - 保持极其微弱 */}
-            <div className="absolute inset-0 rounded-full bg-apple-blue/10 blur-xl" />
-            
             {/* 极简实色球体 */}
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center bg-white dark:bg-[#1C1C1E] border-2 border-apple-blue shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/5 flex items-center justify-center mb-0.5 sm:mb-1">
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center bg-white dark:bg-[#1C2B33] border border-black/10 dark:border-white/12 shadow-[0_10px_26px_rgba(0,0,0,0.10)]">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/10 flex items-center justify-center mb-0.5 sm:mb-1">
                 <Sparkles size={20} className="text-apple-blue" />
               </div>
               <span className="text-[8px] font-black text-apple-blue uppercase tracking-[0.2em]">CORE</span>
@@ -297,29 +294,29 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
 
       {/* 详细数据指标 */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mt-1">
-        <div className="glass-panel p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex flex-col gap-1 sm:gap-2">
-          <div className="flex items-center gap-1.5 text-apple-purple">
+        <div className="meta-card p-3 sm:p-4 flex flex-col gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 text-apple-blue">
             <BrainCircuit size={14} />
             <span className="text-[10px] sm:text-xs font-bold">活跃度</span>
           </div>
           <span className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{metrics.activity}</span>
         </div>
-        <div className="glass-panel p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex flex-col gap-1 sm:gap-2">
+        <div className="meta-card p-3 sm:p-4 flex flex-col gap-1 sm:gap-2">
           <div className="flex items-center gap-1.5 text-red-500">
             <Activity size={14} />
             <span className="text-[10px] sm:text-xs font-bold">情绪极值</span>
           </div>
           <span className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{metrics.emotionExtreme}</span>
         </div>
-        <div className="glass-panel p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex flex-col gap-1 sm:gap-2">
-          <div className="flex items-center gap-1.5 text-blue-500">
+        <div className="meta-card p-3 sm:p-4 flex flex-col gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 text-apple-blue">
             <Droplets size={14} />
             <span className="text-[10px] sm:text-xs font-bold">清晰度</span>
           </div>
           <span className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">{metrics.lucidity}</span>
         </div>
-        <div className="glass-panel p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 flex flex-col gap-1 sm:gap-2">
-          <div className="flex items-center gap-1.5 text-green-500">
+        <div className="meta-card p-3 sm:p-4 flex flex-col gap-1 sm:gap-2">
+          <div className="flex items-center gap-1.5 text-apple-blue">
             <Sparkles size={14} />
             <span className="text-[10px] sm:text-xs font-bold">原型匹配</span>
           </div>
@@ -329,8 +326,8 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
 
       {/* 极简解析结论 */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mt-2 sm:mt-4">
-        <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-white via-[#FFF8FA] to-[#F6F0FF] dark:from-[#1F1A23] dark:via-[#17131E] dark:to-[#121018] border border-black/5 dark:border-white/10 shadow-[0_8px_24px_rgba(30,41,85,0.08)]">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-500 text-[10px] font-bold tracking-wider uppercase">
+        <div className="meta-card p-4 sm:p-6">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue text-[10px] font-bold tracking-wider uppercase">
             核心洞察
           </div>
           <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white mt-2.5 tracking-tight">
@@ -341,7 +338,7 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
           </p>
         </div>
 
-        <div className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-gradient-to-br from-white via-[#F7FAFF] to-[#EEF4FF] dark:from-[#171E2A] dark:via-[#121A27] dark:to-[#0F1621] border border-black/5 dark:border-white/10 shadow-[0_8px_24px_rgba(30,41,85,0.08)]">
+        <div className="meta-card p-4 sm:p-6">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue text-[10px] font-bold tracking-wider uppercase">
             行动建议
           </div>
@@ -390,7 +387,7 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
       )}
 
       {!!immersiveReflection && (
-        <section className="rounded-3xl p-6 bg-gradient-to-br from-white via-[#F9FBFF] to-[#EEF4FF] dark:from-[#151C2A] dark:via-[#111827] dark:to-[#0D1320] border border-black/5 dark:border-white/10">
+        <section className="rounded-3xl p-6 bg-white/70 dark:bg-white/5 border border-black/5 dark:border-white/10">
           <h3 className="text-sm font-bold tracking-wider text-gray-700 dark:text-gray-300">身临其境反思引导</h3>
           <p className="mt-3 text-sm leading-7 text-gray-700 dark:text-gray-300">{immersiveReflection}</p>
         </section>
@@ -399,56 +396,56 @@ export default function TopologyView({ onBack, analysisData, onOpenTarot }: { on
     <div className="fixed -left-[99999px] top-0 pointer-events-none">
       <div
         ref={exportRef}
-        className="w-[1080px] p-14 bg-gradient-to-b from-[#F7FAFF] to-[#EEF3FF] text-[#1C1F2A]"
+        className="w-[1080px] p-14 bg-white text-[#050505]"
       >
-        <div className="rounded-[28px] border border-[#DCE6FF] bg-white/85 shadow-[0_20px_50px_rgba(70,92,180,0.12)] p-10">
+        <div className="rounded-[28px] border border-[#CED0D4] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.10)] p-10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[14px] tracking-[0.2em] font-semibold text-[#6A78B8]">DREAM TOPOLOGY</p>
+              <p className="text-[13px] tracking-[0.22em] font-semibold text-[#65676B]">DREAM TOPOLOGY</p>
               <h1 className="text-[40px] font-black mt-2">拓扑解析报告</h1>
             </div>
             <div className="text-right">
-              <p className="text-[14px] text-[#69758F]">潜意识核心洞察</p>
-              <p className="text-[24px] font-bold text-[#3C54D6]">{coreInsight}</p>
+              <p className="text-[14px] text-[#65676B]">潜意识核心洞察</p>
+              <p className="text-[24px] font-bold text-[#0064E0]">{coreInsight}</p>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-4 mt-8">
-            <div className="rounded-2xl border border-[#E5EBFF] bg-white p-4">
-              <p className="text-xs text-[#7380A1]">潜意识活跃度</p>
+            <div className="rounded-2xl border border-[#CED0D4] bg-[#F7F8FA] p-4">
+              <p className="text-xs text-[#65676B]">潜意识活跃度</p>
               <p className="text-2xl font-black mt-1">{metrics.activity}</p>
             </div>
-            <div className="rounded-2xl border border-[#E5EBFF] bg-white p-4">
-              <p className="text-xs text-[#7380A1]">情绪波动极值</p>
+            <div className="rounded-2xl border border-[#CED0D4] bg-[#F7F8FA] p-4">
+              <p className="text-xs text-[#65676B]">情绪波动极值</p>
               <p className="text-2xl font-black mt-1">{metrics.emotionExtreme}</p>
             </div>
-            <div className="rounded-2xl border border-[#E5EBFF] bg-white p-4">
-              <p className="text-xs text-[#7380A1]">梦境清晰度</p>
+            <div className="rounded-2xl border border-[#CED0D4] bg-[#F7F8FA] p-4">
+              <p className="text-xs text-[#65676B]">梦境清晰度</p>
               <p className="text-2xl font-black mt-1">{metrics.lucidity}</p>
             </div>
-            <div className="rounded-2xl border border-[#E5EBFF] bg-white p-4">
-              <p className="text-xs text-[#7380A1]">原型匹配度</p>
+            <div className="rounded-2xl border border-[#CED0D4] bg-[#F7F8FA] p-4">
+              <p className="text-xs text-[#65676B]">原型匹配度</p>
               <p className="text-2xl font-black mt-1">{metrics.matchRate}</p>
             </div>
           </div>
-          <div className="mt-8 rounded-3xl border border-[#E4EAFE] bg-[#F9FBFF] p-6">
-            <p className="text-sm font-bold tracking-wider text-[#6D78A8]">关键梦境符号</p>
+          <div className="mt-8 rounded-3xl border border-[#CED0D4] bg-[#F7F8FA] p-6">
+            <p className="text-sm font-bold tracking-wider text-[#1C2B33]">关键梦境符号</p>
             <div className="flex flex-wrap gap-2 mt-3">
               {shareSymbols.map((symbol) => (
-                <span key={symbol} className="px-3 py-1.5 rounded-full bg-white border border-[#DEE7FF] text-sm font-medium text-[#34406C]">
+                <span key={symbol} className="px-3 py-1.5 rounded-full bg-white border border-[#CED0D4] text-sm font-medium text-[#1C2B33]">
                   {symbol}
                 </span>
               ))}
             </div>
           </div>
-          <div className="mt-8 rounded-3xl border border-[#E4EAFE] bg-white p-6">
-            <p className="text-sm font-bold tracking-wider text-[#6D78A8]">综合解读</p>
-            <p className="text-[17px] leading-8 text-[#27314D] mt-3 line-clamp-6">{interpretation}</p>
+          <div className="mt-8 rounded-3xl border border-[#CED0D4] bg-white p-6">
+            <p className="text-sm font-bold tracking-wider text-[#1C2B33]">综合解读</p>
+            <p className="text-[17px] leading-8 text-[#1C2B33] mt-3">{interpretation}</p>
           </div>
-          <div className="mt-8 rounded-3xl border border-[#E4EAFE] bg-white p-6">
-            <p className="text-sm font-bold tracking-wider text-[#6D78A8]">行动建议</p>
+          <div className="mt-8 rounded-3xl border border-[#CED0D4] bg-white p-6">
+            <p className="text-sm font-bold tracking-wider text-[#1C2B33]">行动建议</p>
             <div className="mt-3 space-y-3">
               {actionItems.map((item, i) => (
-                <p key={i} className="text-[16px] leading-7 text-[#27314D] line-clamp-4">• {item}</p>
+                <p key={i} className="text-[16px] leading-7 text-[#1C2B33]">• {item}</p>
               ))}
             </div>
           </div>

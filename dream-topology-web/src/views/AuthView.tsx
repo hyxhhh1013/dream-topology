@@ -78,17 +78,17 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="w-full max-w-sm bg-white dark:bg-[#1C1C1E] rounded-3xl overflow-hidden shadow-2xl border border-black/5 dark:border-white/10"
+        className="w-full max-w-sm meta-card rounded-3xl overflow-hidden shadow-2xl"
       >
         {/* Header */}
         <div className="relative p-6 pb-2 text-center">
           <button 
             onClick={onClose}
-            className="absolute right-4 top-4 p-2 rounded-full bg-black/5 dark:bg-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="absolute right-4 top-4 w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14"
           >
             <X size={18} />
           </button>
-          <div className="w-12 h-12 bg-gradient-to-tr from-apple-blue to-apple-purple rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-apple-blue/20">
+          <div className="w-12 h-12 bg-[#0064E0] rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-black/10">
             <UserIcon size={24} className="text-white" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
@@ -117,7 +117,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
                   placeholder="用户名 (如: Dreamer_001)" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
+                  className="meta-input pl-11 text-sm"
                 />
               </motion.div>
             )}
@@ -132,7 +132,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
               placeholder="电子邮箱" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
+              className="meta-input pl-11 text-sm"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
               placeholder="密码" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
+              className="meta-input pl-11 text-sm"
             />
           </div>
 
@@ -162,7 +162,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-apple-blue to-apple-purple text-white font-bold text-sm shadow-lg shadow-apple-blue/30 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-70"
+            className="meta-btn-primary w-full disabled:opacity-70"
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : (
               <>

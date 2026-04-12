@@ -135,12 +135,12 @@ export default function SettingsView() {
       </header>
 
       {/* 用户资料卡片 */}
-      <section className="glass-panel rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 flex items-center justify-between transition-colors border border-black/5 dark:border-white/5 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent">
+      <section className="meta-card rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 flex items-center justify-between transition-colors">
         {isLoggedIn ? (
           <>
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-apple-blue to-apple-purple p-[2px] shadow-md shrink-0">
-                <div className="w-full h-full bg-white dark:bg-black rounded-full flex items-center justify-center transition-colors overflow-hidden">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#E8F3FF] dark:bg-white/8 border border-black/10 dark:border-white/12 shadow-sm shrink-0 p-[2px]">
+                <div className="w-full h-full bg-white dark:bg-[#1C1E21] rounded-full flex items-center justify-center transition-colors overflow-hidden">
                   {profileAvatar ? (
                     <img src={profileAvatar} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -157,7 +157,7 @@ export default function SettingsView() {
             </div>
             <button 
               onClick={() => setShowEditProfile(true)}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-black/5 dark:bg-white/10 rounded-full text-xs sm:text-sm font-bold text-gray-900 dark:text-white transition-colors hover:bg-black/10 dark:hover:bg-white/20 shrink-0"
+              className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[#F1F4F7] dark:bg-white/8 border border-black/10 dark:border-white/12 text-xs font-bold text-gray-900 dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/12 shrink-0"
             >
               编辑
             </button>
@@ -177,7 +177,7 @@ export default function SettingsView() {
             </div>
             <button 
               onClick={() => setShowAuthView(true)}
-              className="px-4 sm:px-6 py-1.5 sm:py-2 bg-apple-blue text-white rounded-full text-xs sm:text-sm font-bold transition-colors hover:bg-blue-600 shrink-0"
+              className="meta-btn-primary shrink-0"
             >
               登录 / 注册
             </button>
@@ -211,7 +211,7 @@ export default function SettingsView() {
             onClick={() => setShowPrivacy(true)}
           />
           <SettingsItem 
-            icon={<Database size={18} className="text-apple-purple" />} 
+            icon={<Database size={18} className="text-apple-blue" />} 
             label="私人潜意识词典" 
             hasArrow={true}
             onClick={() => setShowDictionary(true)}
@@ -223,7 +223,7 @@ export default function SettingsView() {
       {isLoggedIn && (
         <button 
           onClick={() => setShowLogoutConfirm(true)}
-          className="mt-2 sm:mt-4 glass-panel rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors active:scale-95 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10"
+          className="mt-2 sm:mt-4 meta-card rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors active:scale-95 hover:bg-red-50 dark:hover:bg-red-500/10"
         >
           <LogOut size={16} />
           退出登录
@@ -266,7 +266,7 @@ export default function SettingsView() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-gray-900 rounded-3xl p-6 w-full max-w-sm shadow-xl"
+              className="meta-card rounded-3xl p-6 w-full max-w-sm"
             >
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">确认退出登录？</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-6">
@@ -275,13 +275,13 @@ export default function SettingsView() {
               <div className="flex gap-3">
                 <button 
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-3 rounded-xl font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-bold text-gray-700 dark:text-white/90 bg-[#F1F4F7] dark:bg-white/8 border border-black/10 dark:border-white/12 hover:bg-white hover:dark:bg-white/12 transition-colors"
                 >
                   取消
                 </button>
                 <button 
                   onClick={handleLogout}
-                  className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-sm shadow-red-500/30"
+                  className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-colors"
                 >
                   确认退出
                 </button>
@@ -298,7 +298,7 @@ function SettingsGroup({ title, children }: { title: string, children: React.Rea
   return (
     <div>
       <h3 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest mb-2 pl-4 transition-colors">{title}</h3>
-      <div className="glass-panel rounded-3xl overflow-hidden flex flex-col transition-colors shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5">
+      <div className="meta-card rounded-3xl overflow-hidden flex flex-col transition-colors">
         {children}
       </div>
     </div>
@@ -329,10 +329,10 @@ function SettingsItem({
   return (
     <div 
       onClick={isToggle && onToggle ? () => onToggle(!toggleState) : onClick}
-      className={`flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 last:border-0 transition-colors ${(onClick || (isToggle && onToggle)) ? 'cursor-pointer active:bg-black/5 dark:active:bg-white/5' : ''}`}
+      className={`flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10 last:border-0 transition-colors ${(onClick || (isToggle && onToggle)) ? 'cursor-pointer active:bg-black/5 dark:active:bg-white/6' : ''}`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center transition-colors">
+        <div className="w-8 h-8 rounded-2xl bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 flex items-center justify-center transition-colors">
           {icon}
         </div>
         <span className="font-bold text-sm text-gray-900 dark:text-white transition-colors">{label}</span>

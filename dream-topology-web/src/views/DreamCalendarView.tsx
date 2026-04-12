@@ -76,11 +76,11 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
   const emotionColors: Record<string, string> = {
-    anxious: 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]',
-    fear: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]',
-    stress: 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]',
-    peace: 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]',
-    neutral: 'bg-gray-400 shadow-[0_0_8px_rgba(156,163,175,0.8)]'
+    anxious: 'bg-purple-500',
+    fear: 'bg-red-500',
+    stress: 'bg-orange-500',
+    peace: 'bg-apple-blue',
+    neutral: 'bg-gray-400'
   };
 
   return (
@@ -89,13 +89,13 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[60] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
+      className="fixed inset-0 z-[60] bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
       <div className="max-w-md mx-auto min-h-screen px-6 pt-12 pb-24 flex flex-col gap-6 relative">
-        <header className="flex items-center gap-4 sticky top-0 bg-apple-gray-light/80 dark:bg-apple-black/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
+        <header className="flex items-center gap-4 sticky top-0 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
           <button 
             onClick={onBack}
-            className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors shadow-sm hover:bg-white hover:dark:bg-white/14"
           >
             <ChevronLeft size={20} />
           </button>
@@ -105,7 +105,7 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
           </h1>
         </header>
 
-        <section className="glass-panel rounded-[2rem] p-6 bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 shadow-sm flex flex-col gap-4">
+        <section className="meta-card rounded-[2rem] p-6 flex flex-col gap-4">
           <div className="flex justify-between items-center px-2">
             <h2 className="text-lg font-bold text-black dark:text-white">
               {currentYear}年 {currentMonth + 1}月
@@ -113,14 +113,14 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
             <div className="flex gap-2">
               <button
                 onClick={goPrevMonth}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                 aria-label="上一个月"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={goNextMonth}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                 aria-label="下一个月"
               >
                 <ChevronRight size={18} />
@@ -183,7 +183,7 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
                 animate={{ opacity: 1, y: 0 }}
                 key={`${selectedDate}-${index}`}
                 onClick={() => onSelectJournal?.(entry)}
-                className="glass-panel rounded-3xl p-5 flex flex-col gap-3 transition-all shadow-sm bg-white/80 dark:bg-white/10 border border-black/5 dark:border-white/5 cursor-pointer relative overflow-hidden group mb-2"
+                className="meta-card rounded-3xl p-5 flex flex-col gap-3 transition-all cursor-pointer relative overflow-hidden group mb-2"
               >
                 <div className="flex justify-between items-start relative z-10">
                   <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
                 </p>
                 <div className="flex gap-2 mt-1">
                   {entry.tags?.map((tag: string) => (
-                    <span key={tag} className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                    <span key={tag} className="text-[10px] font-bold text-gray-700 dark:text-gray-200 bg-[#F1F4F7] dark:bg-white/8 border border-black/5 dark:border-white/10 px-2 py-0.5 rounded-md">
                       #{tag}
                     </span>
                   ))}
@@ -214,7 +214,7 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               key={`empty-${selectedDate}`}
-              className="glass-panel rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-center border border-dashed border-black/10 dark:border-white/10 bg-transparent shadow-none"
+              className="rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-center border border-dashed border-black/10 dark:border-white/10 bg-transparent"
             >
               <div className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-2">
                 <CalendarIcon size={20} />

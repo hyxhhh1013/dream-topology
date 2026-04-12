@@ -54,13 +54,13 @@ export default function SymbolDictionaryView({ onBack }: { onBack: () => void })
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[60] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
+      className="fixed inset-0 z-[60] bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
       <div className="max-w-md mx-auto min-h-screen px-6 pt-12 pb-24 flex flex-col gap-6 relative">
-        <header className="flex items-center gap-4 sticky top-0 bg-apple-gray-light/80 dark:bg-apple-black/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
+        <header className="flex items-center gap-4 sticky top-0 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
           <button 
             onClick={onBack}
-            className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors shadow-sm hover:bg-white hover:dark:bg-white/14"
           >
             <ChevronLeft size={20} />
           </button>
@@ -76,7 +76,7 @@ export default function SymbolDictionaryView({ onBack }: { onBack: () => void })
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="搜索符号、原型或梦境..." 
-            className="w-full bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl py-3 pl-12 pr-4 text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 transition-colors shadow-inner"
+            className="meta-input pl-12 text-sm"
           />
         </div>
 
@@ -108,20 +108,20 @@ export default function SymbolDictionaryView({ onBack }: { onBack: () => void })
 
 function DictionaryCard({ icon, name, archetype, desc }: { icon: string, name: string, archetype: string, desc: string }) {
   return (
-    <div className="glass-panel rounded-3xl p-5 flex flex-col gap-3 transition-colors shadow-sm dark:shadow-none bg-white/50 dark:bg-transparent border border-black/5 dark:border-white/5">
+    <div className="meta-card rounded-3xl p-5 flex flex-col gap-3 transition-colors">
       <div className="flex items-center gap-4 mb-2">
-        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black/40 flex items-center justify-center text-2xl shadow-sm border border-black/5 dark:border-white/5">
+        <div className="w-12 h-12 rounded-2xl bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 flex items-center justify-center text-2xl shadow-sm">
           {icon}
         </div>
         <div>
           <h3 className="font-bold text-black dark:text-white text-base">{name}</h3>
-          <div className="flex items-center gap-1 text-xs text-apple-purple font-medium mt-0.5 max-w-[200px] truncate" title={archetype}>
+          <div className="flex items-center gap-1 text-xs text-apple-blue dark:text-white/90 font-medium mt-0.5 max-w-[200px] truncate" title={archetype}>
             <Sparkles size={12} />
             <span>原型：{archetype}</span>
           </div>
         </div>
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium bg-white/60 dark:bg-black/20 p-4 rounded-2xl line-clamp-4" title={desc}>
+      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 p-4 rounded-2xl line-clamp-4" title={desc}>
         {desc}
       </p>
     </div>

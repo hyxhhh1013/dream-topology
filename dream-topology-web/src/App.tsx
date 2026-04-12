@@ -72,7 +72,7 @@ function App() {
   };
 
   return (
-    <div className={`relative min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-apple-black text-white' : 'bg-apple-gray-light text-black'} overflow-hidden pb-24 selection:bg-apple-purple/30`}>
+    <div className={`relative min-h-screen transition-colors duration-500 ${isDarkMode ? 'bg-[#1C1E21] text-white' : 'bg-[#F0F2F5] text-black'} overflow-hidden pb-24 selection:bg-[#E8F3FF] dark:selection:bg-white/12`}>
       {/* 全局 Toast 提示 */}
       <AnimatePresence>
         {toast.visible && (
@@ -99,11 +99,8 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* 沉浸式动态背景光晕 */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] ${isDarkMode ? 'bg-apple-purple/20' : 'bg-apple-purple/10'} blur-[100px] rounded-full mix-blend-multiply dark:mix-blend-screen animate-blob`} />
-        <div className={`absolute top-[20%] right-[-20%] w-[60%] h-[60%] ${isDarkMode ? 'bg-apple-blue/20' : 'bg-apple-blue/10'} blur-[100px] rounded-full mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-2000`} />
-        <div className={`absolute bottom-[-20%] left-[10%] w-[60%] h-[60%] ${isDarkMode ? 'bg-orange-500/20' : 'bg-orange-500/10'} blur-[100px] rounded-full mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-4000`} />
+        <div className={`absolute top-[-20%] right-[-20%] w-[70%] h-[70%] ${isDarkMode ? 'bg-apple-blue/14' : 'bg-apple-blue/8'} blur-[120px] rounded-full`} />
       </div>
 
       {/* Theme Toggle Button - Floating */}
@@ -114,7 +111,7 @@ function App() {
         className="fixed top-4 right-4 md:top-8 md:right-8 z-50 p-3 rounded-full transition-colors shadow-sm dark:shadow-none bg-white/80 dark:bg-black/20 backdrop-blur-md border border-black/5 dark:border-white/10"
         aria-label="Toggle theme"
       >
-        {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-apple-purple" />}
+        {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-apple-blue" />}
       </motion.button>
 
       {/* 主视图区域 */}
@@ -133,13 +130,12 @@ function App() {
         </main>
       </div>
 
-      {/* Apple 风格导航栏 (Mobile: Bottom, Desktop: Left Side) */}
-      <nav className={`fixed z-50 transition-all duration-300 glass-panel bg-white/78 dark:bg-[#1c1c1e]/72 shadow-[0_8px_28px_rgba(0,0,0,0.08)] dark:shadow-none
+      <nav className={`fixed z-50 transition-all duration-300 bg-white/78 dark:bg-white/10 backdrop-blur-md border border-black/10 dark:border-white/12 shadow-sm
         bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.25rem)] max-w-md py-2 px-3 rounded-2xl border
         md:rounded-none md:top-0 md:bottom-0 md:left-0 md:translate-x-0 md:w-24 md:h-screen md:py-12 md:px-0 md:border-t-0 md:border-r md:flex md:flex-col
         ${isMobileNavVisible ? 'translate-y-0 opacity-100' : 'translate-y-[105%] opacity-0 pointer-events-none'}
         md:translate-y-0 md:opacity-100 md:pointer-events-auto
-        ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+        ${isDarkMode ? 'border-white/12' : 'border-black/10'}`}>
         <div className="w-full max-w-md mx-auto md:max-w-none md:mx-0 md:h-full flex md:flex-col justify-between items-center relative gap-2 md:gap-8">
           <NavItem 
             icon={<Mic size={24} />} 

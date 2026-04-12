@@ -5,6 +5,7 @@ import SymbolDictionaryView from './SymbolDictionaryView';
 import JournalDetailView from './JournalDetailView';
 import DreamCalendarView from './DreamCalendarView';
 import MeditationView from './MeditationView';
+import { getUserDreams, fetchDreamSymbols } from '../services/api';
 
 export default function InsightsView({ dreamData }: { dreamData?: any }) {
   const [activeTab, setActiveTab] = useState<'stats' | 'journal'>('stats');
@@ -19,13 +20,18 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
   const [isLoadingDreams, setIsLoadingDreams] = useState(true);
 
   const [recentSymbols, setRecentSymbols] = useState<any[]>([]);
+  const archetypeConfidence = dreamData?.analysis?.scientific_basis?.confidence;
+  const archetypeConfidencePct = (() => {
+    if (typeof archetypeConfidence !== 'number' || Number.isNaN(archetypeConfidence)) return undefined;
+    const raw = archetypeConfidence <= 1 ? archetypeConfidence * 100 : archetypeConfidence;
+    return Math.max(0, Math.min(100, Math.round(raw)));
+  })();
 
   // Fetch all dreams for the list view
   useEffect(() => {
     async function fetchDreams() {
       try {
         setIsLoadingDreams(true);
-        const { getUserDreams } = await import('../services/api');
         const dreams = await getUserDreams();
         setAllDreams(dreams);
       } catch (e) {
@@ -43,7 +49,6 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
   useEffect(() => {
     async function fetchSymbols() {
       try {
-        const { fetchDreamSymbols } = await import('../services/api');
         const symbols = await fetchDreamSymbols();
         setRecentSymbols(symbols.slice(0, 2)); // Only take top 2 for the dashboard
       } catch (e) {
@@ -138,16 +143,16 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
       </header>
 
       {/* 顶部标签切换 */}
-      <div className="flex p-1 bg-black/5 dark:bg-white/5 rounded-xl sm:rounded-2xl transition-colors">
+      <div className="flex p-1 bg-[#F0F2F5] dark:bg-white/5 rounded-xl sm:rounded-2xl border border-black/5 dark:border-white/10 transition-colors">
         <button 
           onClick={() => setActiveTab('stats')}
-          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'stats' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
+          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'stats' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
         >
           数据统计
         </button>
         <button 
           onClick={() => setActiveTab('journal')}
-          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'journal' ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
+          className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${activeTab === 'journal' ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'}`}
         >
           梦境日记
         </button>
@@ -165,8 +170,8 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
           >
             {/* 核心统计卡片 */}
             <section className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/10 dark:bg-apple-blue/20 flex items-center justify-center text-apple-blue group-hover:scale-110 transition-transform">
+              <div className="meta-card p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue">
                   <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
@@ -178,8 +183,8 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                   </p>
                 </div>
               </div>
-              <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3 shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5 group hover:bg-white dark:hover:bg-white/5 transition-all">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-purple/10 dark:bg-apple-purple/20 flex items-center justify-center text-apple-purple group-hover:scale-110 transition-transform">
+              <div className="meta-card p-3.5 sm:p-5 flex flex-col gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue/10 flex items-center justify-center text-apple-blue">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
@@ -190,7 +195,9 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                         ? dreamData.analysis.overall_archetype.split('（')[0].split('(')[0] // 兼容中英文括号
                         : '阿尼玛'} 
                     </span>
-                    <span className="text-[10px] sm:text-sm font-normal text-gray-500 dark:text-gray-400 ml-1.5 shrink-0">45%</span>
+                    <span className="text-[10px] sm:text-sm font-normal text-gray-500 dark:text-gray-400 ml-1.5 shrink-0">
+                      {archetypeConfidencePct !== undefined ? `${archetypeConfidencePct}%` : '—'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -246,13 +253,13 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 transition-colors">专属自愈指南</h2>
                 <motion.div 
                   whileHover={{ scale: 1.01 }}
-                  className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden transition-colors border border-apple-purple/30 shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent"
+                  className="meta-card p-4 sm:p-6 relative overflow-hidden transition-colors"
                 >
-                  <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-apple-purple/20 blur-3xl rounded-full" />
+                  <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-apple-blue/12 blur-3xl rounded-full" />
                   
                   <div className="relative z-10 flex flex-col gap-3 sm:gap-4">
                     <div className="flex items-center gap-2.5 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-blue text-white flex items-center justify-center shadow-lg shadow-apple-purple/40">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-apple-blue text-white flex items-center justify-center shadow-lg">
                         <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                       </div>
                       <div className="min-w-0">
@@ -263,7 +270,7 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                     
                     <button 
                       onClick={() => setShowMeditation(true)}
-                      className="w-full py-2.5 sm:py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md hover:opacity-90"
+                      className="meta-btn-primary w-full"
                     >
                       开始今日练习 <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
@@ -285,7 +292,7 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
               <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white transition-colors">所有记录</h2>
               <button 
                 onClick={() => setShowCalendar(true)}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 hover:bg-white hover:dark:bg-white/14 transition-colors"
               >
                 <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
@@ -370,11 +377,11 @@ function SymbolCard({ icon, name, archetype, count, trend, desc, onClick }: { ic
     <motion.div 
       onClick={onClick}
       whileHover={{ scale: 1.01 }}
-      className="glass-panel rounded-3xl p-5 flex flex-col gap-3 transition-all shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5 cursor-pointer h-full"
+      className="meta-card p-5 flex flex-col gap-3 transition-all cursor-pointer h-full"
     >
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black/40 flex items-center justify-center text-2xl shadow-sm transition-colors border border-black/5 dark:border-white/5">
+          <div className="w-12 h-12 rounded-2xl bg-[#F7F8FA] dark:bg-black/30 flex items-center justify-center text-2xl border border-black/5 dark:border-white/10">
             {icon}
           </div>
           <div>
@@ -395,7 +402,7 @@ function SymbolCard({ icon, name, archetype, count, trend, desc, onClick }: { ic
           </div>
         </div>
       </div>
-      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-white/50 dark:bg-black/20 p-4 rounded-2xl transition-colors font-medium line-clamp-3">
+      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-[#F7F8FA] dark:bg-black/20 p-4 rounded-2xl transition-colors font-medium line-clamp-3">
         {desc}
       </p>
     </motion.div>
@@ -409,13 +416,13 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: '100%' }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[70] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
+      className="fixed inset-0 z-[70] bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
       <div className="max-w-md mx-auto min-h-screen px-6 pt-12 pb-24 flex flex-col gap-6 relative">
-        <header className="flex justify-between items-center sticky top-0 bg-apple-gray-light/80 dark:bg-apple-black/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
+        <header className="flex justify-between items-center sticky top-0 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors shadow-sm"
+            className="w-10 h-10 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors shadow-sm hover:bg-white hover:dark:bg-white/14"
           >
             <X size={20} />
           </button>
@@ -430,14 +437,14 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{symbol.name}</h1>
-              <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-apple-purple/10 text-apple-purple text-sm font-bold">
+              <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#E8F3FF] dark:bg-white/8 text-apple-blue dark:text-white/90 text-sm font-bold border border-black/5 dark:border-white/10">
                 <Sparkles size={16} />
                 <span>原型：{symbol.archetype}</span>
               </div>
             </div>
           </div>
 
-          <div className="glass-panel rounded-[2rem] p-6 bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 shadow-sm mt-4">
+          <div className="meta-card p-6 mt-4">
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">基本含义</h3>
             <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
               {symbol.desc}
@@ -446,12 +453,12 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
             {(symbol.cultureTag || symbol.symbolEmotion) && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {symbol.cultureTag && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-apple-blue/10 text-apple-blue text-xs font-bold">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#E8F3FF] dark:bg-white/8 text-apple-blue dark:text-white/90 text-xs font-bold border border-black/5 dark:border-white/10">
                     文化标签: {symbol.cultureTag}
                   </span>
                 )}
                 {symbol.symbolEmotion && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-500/10 text-red-500 text-xs font-bold">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-300 text-xs font-bold border border-black/5 dark:border-white/10">
                     潜在情绪: {symbol.symbolEmotion}
                   </span>
                 )}
@@ -460,7 +467,7 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
           </div>
 
           {symbol.fullAnalysis && (
-            <div className="glass-panel rounded-[2rem] p-6 bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/5 shadow-sm">
+            <div className="meta-card p-6">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">深度荣格分析</h3>
               <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed font-medium whitespace-pre-wrap">
                 {symbol.fullAnalysis}
@@ -468,8 +475,8 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
             </div>
           )}
 
-          <div className="glass-panel rounded-[2rem] p-6 bg-apple-blue/5 border border-apple-blue/20 shadow-sm flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-apple-blue/20 flex items-center justify-center text-apple-blue shrink-0">
+          <div className="rounded-[20px] p-6 bg-[#E8F3FF] dark:bg-white/6 border border-[#0064E0]/18 dark:border-white/10 shadow-sm flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-white/70 dark:bg-white/10 border border-black/10 dark:border-white/12 flex items-center justify-center text-apple-blue dark:text-white/90 shrink-0">
               <TrendingUp size={20} />
             </div>
             <div>
@@ -487,41 +494,32 @@ function SymbolDetailCard({ symbol, onClose }: { symbol: any, onClose: () => voi
 
 function JournalCard({ date, time, title, preview, emotion, tags, onClick }: { date: string, time: string, title: string, preview: string, emotion: string, tags: string[], onClick?: () => void }) {
   const emotionColors: Record<string, string> = {
-    anxious: 'bg-purple-500',
+    anxious: 'bg-apple-blue',
     fear: 'bg-red-500',
-    stress: 'bg-orange-500',
-    peace: 'bg-blue-500'
-  };
-
-  const bgGradient: Record<string, string> = {
-    anxious: 'from-purple-500/10 to-transparent',
-    fear: 'from-red-500/10 to-transparent',
-    stress: 'from-orange-500/10 to-transparent',
-    peace: 'from-blue-500/10 to-transparent'
+    stress: 'bg-[#F7B928]',
+    peace: 'bg-[#31A24C]'
   };
 
   return (
     <motion.div 
       onClick={onClick}
       whileHover={{ scale: 1.01 }}
-      className={`glass-panel rounded-3xl p-5 flex flex-col gap-3 transition-all shadow-sm dark:shadow-none bg-white/90 dark:bg-transparent border border-black/5 dark:border-white/5 cursor-pointer relative overflow-hidden h-full`}
+      className="meta-card p-5 flex flex-col gap-3 transition-all cursor-pointer relative overflow-hidden h-full"
     >
-      <div className={`absolute top-0 left-0 w-full h-24 bg-gradient-to-b ${bgGradient[emotion]} opacity-50 pointer-events-none`} />
-      
       <div className="flex justify-between items-start relative z-10">
         <div className="flex items-center gap-3">
-          <div className="flex flex-col items-center justify-center w-12 h-12 rounded-2xl bg-white dark:bg-black/40 shadow-sm border border-black/5 dark:border-white/5">
+          <div className="flex flex-col items-center justify-center w-12 h-12 rounded-2xl bg-[#F7F8FA] dark:bg-black/30 border border-black/5 dark:border-white/10">
             <span className="text-[10px] font-bold text-gray-500 uppercase">{date}</span>
             <span className="text-sm font-black text-gray-900 dark:text-white">{time}</span>
           </div>
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white transition-colors text-base flex items-center gap-2">
               {title}
-              <span className={`w-2 h-2 rounded-full ${emotionColors[emotion]}`} />
+              <span className={`w-2 h-2 rounded-full ${emotionColors[emotion] ?? 'bg-gray-400'}`} />
             </h3>
             <div className="flex gap-2 mt-1">
               {tags.map(tag => (
-                <span key={tag} className="text-[10px] font-bold text-gray-600 dark:text-gray-400 bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                <span key={tag} className="text-[10px] font-bold text-gray-700 dark:text-gray-200 bg-[#F1F4F7] dark:bg-white/8 px-2 py-0.5 rounded-md border border-black/5 dark:border-white/10">
                   #{tag}
                 </span>
               ))}

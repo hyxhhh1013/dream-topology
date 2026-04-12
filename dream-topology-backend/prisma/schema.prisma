@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -16,7 +16,7 @@ model User {
   name             String?
   password_hash    String
   encryption_key   String    // Used for app-level encryption of dream content
-  preferences      String?   @db.Text
+  preferences      String?
   
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
@@ -34,19 +34,19 @@ model User {
 model DreamRecord {
   id                 String    @id @default(uuid())
   user_id            String
-  content            String    @db.Text
+  content            String
   emotion            String    @default("NEUTRAL") // App-level Enum
   recorded_at        DateTime  @default(now())
   audio_url          String?
-  analysis_result    String?   @db.Text
-  cross_analysis     String?   @db.Text
+  analysis_result    String?
+  cross_analysis     String?
   
   // Sensations (0-100)
   vividness          Int       @default(0)
   terror             Int       @default(0)
   lucidity           Int       @default(0)
   
-  content_embedding  String?   @db.Text
+  content_embedding  String?
 
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -69,7 +69,7 @@ model PhysiologicalData {
   dream_record_id    String    @unique
   rem_heart_rate     Int?      // bpm
   room_temperature   Float?    // Celsius
-  raw_health_data    String?   @db.Text
+  raw_health_data    String?
   device_source      String?   // e.g., "apple_watch", "xiaomi_band", "huawei_watch", "garmin"
 
   created_at         DateTime  @default(now())
@@ -82,8 +82,8 @@ model PhysiologicalData {
 
 model DreamSymbol {
   id                 String    @id @default(uuid())
-  name               String    @unique @db.VarChar(255)
-  universal_meaning  String    @db.Text
+  name               String    @unique
+  universal_meaning  String
   
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -97,7 +97,7 @@ model DreamToSymbol {
   id                 String    @id @default(uuid())
   dream_record_id    String
   dream_symbol_id    String
-  personalized_meaning String  @db.Text
+  personalized_meaning String
 
   created_at         DateTime  @default(now())
 
@@ -131,8 +131,8 @@ model InsightReport {
   report_type        String    // "weekly", "monthly"
   period_start       DateTime
   period_end         DateTime
-  summary            String    @db.Text
-  detailed_analysis  String    @db.Text
+  summary            String
+  detailed_analysis  String
 
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
@@ -148,10 +148,10 @@ model TarotReading {
   user_id           String
   dream_record_id   String?
   spread_type       String    @default("three_card")
-  question          String?   @db.Text
+  question          String?
   ai_summary        String
-  ai_interpretation String    @db.Text
-  ai_advice         String?   @db.Text
+  ai_interpretation String
+  ai_advice         String?
   created_at        DateTime  @default(now())
 
   user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -170,8 +170,8 @@ model TarotReadingCard {
   card_name        String
   card_emoji       String?
   is_reversed      Boolean   @default(false)
-  upright_meaning  String    @db.Text
-  reversed_meaning String    @db.Text
+  upright_meaning  String
+  reversed_meaning String
   created_at       DateTime  @default(now())
 
   tarot_reading    TarotReading @relation(fields: [tarot_reading_id], references: [id], onDelete: Cascade)

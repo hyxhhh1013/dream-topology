@@ -174,7 +174,7 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
       const image = await toPng(exportRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: '#F6F8FF',
+        backgroundColor: '#FFFFFF',
       });
       const link = document.createElement('a');
       link.download = `塔罗解读-${new Date().toISOString().slice(0, 10)}.png`;
@@ -194,45 +194,39 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-      className="fixed inset-0 z-[80] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
+      className="fixed inset-0 z-[80] bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
-      {/* Persistant Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-apple-purple/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-apple-blue/10 blur-[120px] rounded-full animate-pulse animation-delay-2000" />
-      </div>
-
       <div className="max-w-4xl mx-auto min-h-screen px-4 sm:px-8 pt-4 sm:pt-12 pb-20 relative z-10">
-        <header className="flex items-center justify-between sticky top-0 py-3 bg-apple-gray-light/75 dark:bg-apple-black/75 backdrop-blur-xl z-20 -mx-4 px-4 sm:-mx-8 sm:px-8">
-          <button onClick={onBack} className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all">
+        <header className="flex items-center justify-between sticky top-0 py-3 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-xl z-20 -mx-4 px-4 sm:-mx-8 sm:px-8">
+          <button onClick={onBack} className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 hover:bg-white hover:dark:bg-white/14 active:scale-90 transition-all shadow-sm">
             <ChevronLeft size={18} />
           </button>
           <div className="flex flex-col items-center">
             <h2 className="font-black tracking-[0.2em] text-gray-900 dark:text-white uppercase text-xs sm:text-sm">梦境塔罗</h2>
             <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Dream Divination</span>
           </div>
-          <button onClick={shareImage} disabled={!reading || isSharing} className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-apple-blue disabled:opacity-50 hover:bg-black/5 dark:hover:bg-white/5 active:scale-90 transition-all">
+          <button onClick={shareImage} disabled={!reading || isSharing} className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-apple-blue disabled:opacity-50 hover:bg-white hover:dark:bg-white/14 active:scale-90 transition-all shadow-sm">
             {isSharing ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
           </button>
         </header>
 
-        <nav className="flex gap-1 p-1 bg-black/5 dark:bg-white/5 rounded-xl mt-4">
-          <button onClick={() => setActiveTab('draw')} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'draw' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
+        <nav className="flex gap-1 p-1 bg-[#F0F2F5] dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/10 mt-4">
+          <button onClick={() => setActiveTab('draw')} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'draw' ? 'bg-white dark:bg-white/10 text-apple-blue shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}>
             抽牌
           </button>
-          <button onClick={loadHistory} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'history' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
+          <button onClick={loadHistory} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'history' ? 'bg-white dark:bg-white/10 text-apple-blue shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}>
             <History size={12} /> 历史
           </button>
-          <button onClick={loadFavorites} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'favorites' ? 'bg-white dark:bg-[#2c2c2e] text-apple-blue shadow-sm' : 'text-gray-500'}`}>
+          <button onClick={loadFavorites} className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all ${activeTab === 'favorites' ? 'bg-white dark:bg-white/10 text-apple-blue shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}>
             <BookMarked size={12} /> 收藏
           </button>
         </nav>
 
         {activeTab === 'draw' && (
           <section className="mt-3 flex flex-col gap-3">
-            <div className="glass-panel rounded-2xl p-3 bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 shadow-sm">
+            <div className="meta-card rounded-2xl p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-1.5">
-                <Sparkles size={12} className="text-apple-purple" />
+                <Sparkles size={12} className="text-apple-blue" />
                 <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">潜意识提问</p>
               </div>
               <div className="relative">
@@ -240,16 +234,17 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder="想问潜意识什么？"
-                  className="w-full min-h-[50px] rounded-xl bg-black/5 dark:bg-black/30 border border-transparent focus:border-apple-blue/30 focus:bg-white dark:focus:bg-black/50 p-2.5 text-xs text-gray-800 dark:text-gray-200 outline-none transition-all placeholder-gray-400 resize-none"
+                  className="meta-input min-h-[70px] text-xs resize-none placeholder-gray-400"
                 />
-                <button 
-                  onClick={handleDraw} 
-                  disabled={isDrawing} 
-                  className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-gradient-to-r from-apple-purple to-apple-blue text-white disabled:opacity-60 flex items-center justify-center shadow-lg active:scale-90 transition-all"
-                >
-                  {isDrawing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                </button>
               </div>
+              <button
+                onClick={handleDraw}
+                disabled={isDrawing}
+                className="meta-btn-primary w-full mt-3"
+              >
+                {isDrawing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                {isDrawing ? '正在抽牌...' : '抽三张牌'}
+              </button>
             </div>
 
             <AnimatePresence mode="wait">
@@ -299,29 +294,61 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                   </div>
 
                   {/* AI Interpretation Area - Compact */}
-                  <div className="glass-panel rounded-2xl p-4 bg-gradient-to-br from-white/90 to-[#F7FAFF] dark:from-[#1C1D26]/90 dark:to-[#111218] border border-apple-blue/10 shadow-lg">
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-apple-blue/10 flex items-center justify-center shrink-0">
-                        <Sparkles size={16} className="text-apple-blue" />
+                  <div className="meta-card rounded-2xl p-4 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 flex items-center justify-center shrink-0">
+                        <Sparkles size={18} className="text-apple-blue dark:text-white/90" />
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-black text-gray-900 dark:text-white truncate">{reading.ai_summary}</h4>
-                        <p className="text-[9px] text-apple-blue font-bold uppercase tracking-widest mt-0.5">AI Insights</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[10px] text-apple-blue font-bold uppercase tracking-widest">AI Insights</p>
+                        <h4 className="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight mt-1">{reading.ai_summary}</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium mt-3 whitespace-pre-wrap">
+                          {reading.ai_interpretation}
+                        </p>
                       </div>
                     </div>
-                    
-                    <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed font-medium bg-black/5 dark:bg-white/5 p-3 rounded-xl italic">
-                      "{reading.ai_interpretation}"
-                    </p>
+
+                    {!!reading.evidence?.length && (
+                      <div className="mt-5">
+                        <p className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">解读依据</p>
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {reading.evidence.slice(0, 3).map((e, idx) => (
+                            <div key={idx} className="rounded-2xl bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 p-3">
+                              <div className="flex items-start gap-2">
+                                <div className="w-6 h-6 rounded-full bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 text-apple-blue dark:text-white/90 flex items-center justify-center text-[10px] font-black shrink-0">
+                                  {idx + 1}
+                                </div>
+                                <p className="text-[11px] font-bold text-gray-900 dark:text-white leading-snug">
+                                  {e.point}
+                                </p>
+                              </div>
+                              <div className="mt-2 space-y-2">
+                                <div>
+                                  <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">牌面</p>
+                                  <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-snug">{e.card_basis}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">梦境</p>
+                                  <p className="text-[11px] text-gray-700 dark:text-gray-300 leading-snug">{e.dream_basis}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {!!reading.advice?.length && (
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {reading.advice.map((a, i) => (
-                          <div key={i} className="px-2.5 py-1 rounded-lg bg-apple-purple/5 border border-apple-purple/10 text-apple-purple text-[9px] font-bold flex items-center gap-1">
-                            <div className="w-1 h-1 rounded-full bg-apple-purple" />
-                            {a}
-                          </div>
-                        ))}
+                      <div className="mt-5">
+                        <p className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">行动建议</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {reading.advice.map((a, i) => (
+                            <div key={i} className="px-3 py-2 rounded-2xl bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 text-[11px] font-bold text-apple-blue dark:text-white/90 flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-apple-blue dark:bg-white/80" />
+                              {a}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -340,7 +367,7 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
               </div>
             )}
             {history.map((item) => (
-              <button key={item.id} onClick={() => { setReading(item); setActiveTab('draw'); }} className="w-full text-left rounded-3xl p-5 glass-panel bg-white/80 dark:bg-white/5 border border-black/5 dark:border-white/10 group hover:border-apple-blue/30 transition-all active:scale-[0.98]">
+              <button key={item.id} onClick={() => { setReading(item); setActiveTab('draw'); }} className="w-full text-left rounded-3xl p-5 meta-card group hover:border-black/10 dark:hover:border-white/18 transition-all active:scale-[0.98]">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(item.created_at).toLocaleString()}</p>
                   <div className="flex gap-1">
@@ -352,7 +379,7 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                 <p className="text-base font-black text-gray-900 dark:text-white tracking-tight">{item.ai_summary}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {item.cards.map(c => (
-                    <span key={c.id} className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md">
+                    <span key={c.id} className="text-[10px] font-bold text-gray-700 dark:text-gray-200 bg-[#F1F4F7] dark:bg-white/8 border border-black/5 dark:border-white/10 px-2 py-1 rounded-md">
                       {c.card_name}{c.is_reversed ? '(逆)' : ''}
                     </span>
                   ))}
@@ -371,10 +398,10 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
               </div>
             )}
             {favorites.map((f) => (
-              <div key={f.id} className="rounded-3xl p-5 glass-panel bg-white dark:bg-[#1C1D26] border border-black/5 dark:border-white/10 flex flex-col items-center text-center gap-2">
+              <div key={f.id} className="rounded-3xl p-5 meta-card flex flex-col items-center text-center gap-2">
                 <p className="text-4xl mb-1">{f.card_emoji || '🔮'}</p>
                 <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight">{f.card_name}</p>
-                <p className="text-[9px] font-black text-apple-blue uppercase tracking-widest bg-apple-blue/5 px-2 py-0.5 rounded-full">{f.card_code}</p>
+                <p className="text-[9px] font-black text-apple-blue dark:text-white/90 uppercase tracking-widest bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 px-2 py-0.5 rounded-full">{f.card_code}</p>
               </div>
             ))}
           </section>
@@ -383,19 +410,16 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
 
       {/* Share Export Hidden Area - Refined for better image generation */}
       <div className="fixed -left-[99999px] top-0 pointer-events-none">
-        <div ref={exportRef} className="w-[1080px] p-16 bg-[#F6F8FF] text-[#1D2333] font-sans">
-          <div className="rounded-[40px] bg-white border border-[#DEE6FF] p-12 shadow-[0_30px_80px_rgba(71,89,162,0.12)] relative overflow-hidden">
-            {/* Background pattern */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E3E9FF] blur-[100px] rounded-full opacity-50 -translate-y-1/2 translate-x-1/2" />
-            
-            <div className="relative z-10">
+        <div ref={exportRef} className="w-[1080px] p-16 bg-white text-[#050505] font-sans">
+          <div className="rounded-[40px] bg-white border border-[#CED0D4] p-12 shadow-[0_30px_80px_rgba(0,0,0,0.10)] relative overflow-hidden">
+            <div className="relative">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[14px] tracking-[0.3em] font-black text-[#6D78A8] uppercase">Dream Divination Report</p>
-                  <h1 className="text-[52px] font-black mt-3 tracking-tighter text-[#1A1D2E]">塔罗牌阵解读</h1>
+                  <p className="text-[14px] tracking-[0.3em] font-black text-[#65676B] uppercase">Dream Divination Report</p>
+                  <h1 className="text-[52px] font-black mt-3 tracking-tighter text-[#050505]">塔罗牌阵解读</h1>
                 </div>
-                <div className="w-20 h-20 rounded-3xl bg-[#F0F4FF] flex items-center justify-center border border-[#DEE6FF]">
-                  <span className="text-4xl">🌌</span>
+                <div className="w-20 h-20 rounded-3xl bg-[#E8F3FF] flex items-center justify-center border border-[#CED0D4]">
+                  <span className="text-4xl">🔮</span>
                 </div>
               </div>
 
@@ -403,9 +427,9 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                 <>
                   <div className="grid grid-cols-3 gap-6 mt-12">
                     {reading.cards.map((card) => (
-                      <div key={`share-${card.id}`} className="rounded-[2rem] border-2 border-[#E3E9FF] bg-white p-6 shadow-sm flex flex-col items-center text-center">
+                      <div key={`share-${card.id}`} className="rounded-[2rem] border-2 border-[#CED0D4] bg-white p-6 shadow-sm flex flex-col items-center text-center">
                         <p className="text-6xl mb-4">{card.card_emoji || '🔮'}</p>
-                        <p className="text-2xl font-black text-[#1A1D2E]">{card.card_name}</p>
+                        <p className="text-2xl font-black text-[#050505]">{card.card_name}</p>
                         <p className={`text-sm mt-2 font-black uppercase tracking-widest ${card.is_reversed ? 'text-orange-500' : 'text-emerald-500'}`}>
                           {card.is_reversed ? '逆位 (Reversed)' : '正位 (Upright)'}
                         </p>
@@ -414,34 +438,34 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                   </div>
 
                   <div className="mt-12 space-y-8">
-                    <div className="p-8 rounded-[2.5rem] bg-[#F9FBFF] border border-[#E3E9FF]">
+                    <div className="p-8 rounded-[2.5rem] bg-[#F7F8FA] border border-[#CED0D4]">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-2 h-6 bg-apple-blue rounded-full" />
-                        <p className="text-lg font-black text-[#68749A] uppercase tracking-widest">潜意识洞察结论</p>
+                        <div className="w-2 h-6 bg-[#0064E0] rounded-full" />
+                        <p className="text-lg font-black text-[#65676B] uppercase tracking-widest">潜意识洞察结论</p>
                       </div>
-                      <p className="text-3xl font-black text-[#2C3B77] leading-tight">{reading.ai_summary}</p>
-                      <p className="text-[20px] leading-relaxed mt-6 text-[#4A5578] font-medium border-l-4 border-[#DEE6FF] pl-6 py-2">
+                      <p className="text-3xl font-black text-[#050505] leading-tight">{reading.ai_summary}</p>
+                      <p className="text-[20px] leading-relaxed mt-6 text-[#1C2B33] font-medium border-l-4 border-[#CED0D4] pl-6 py-2 whitespace-pre-wrap">
                         {reading.ai_interpretation}
                       </p>
                     </div>
 
                     {!!reading.evidence?.length && (
                       <div className="grid grid-cols-1 gap-4">
-                        <p className="text-sm font-black text-[#68749A] uppercase tracking-[0.3em] ml-2">Evidence Map / 解读依据</p>
+                        <p className="text-sm font-black text-[#65676B] uppercase tracking-[0.3em] ml-2">Evidence Map / 解读依据</p>
                         {reading.evidence.slice(0, 3).map((e, idx) => (
-                          <div key={`share-evidence-${idx}`} className="rounded-3xl border border-[#E9EEFF] bg-white p-6 flex flex-col gap-4">
-                            <p className="text-[18px] font-black text-[#1A1D2E] flex items-center gap-3">
-                              <span className="w-7 h-7 rounded-full bg-[#DEE6FF] text-[#2C3B77] flex items-center justify-center text-xs">{idx + 1}</span>
+                          <div key={`share-evidence-${idx}`} className="rounded-3xl border border-[#CED0D4] bg-white p-6 flex flex-col gap-4">
+                            <p className="text-[18px] font-black text-[#050505] flex items-center gap-3">
+                              <span className="w-7 h-7 rounded-full bg-[#E8F3FF] text-[#0064E0] flex items-center justify-center text-xs">{idx + 1}</span>
                               {e.point}
                             </p>
                             <div className="grid grid-cols-2 gap-4">
-                              <div className="bg-[#F9FBFF] p-4 rounded-2xl">
-                                <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mb-2">牌面依据</p>
-                                <p className="text-[14px] text-[#4A5578] leading-normal">{e.card_basis}</p>
+                              <div className="bg-[#F7F8FA] p-4 rounded-2xl border border-black/5">
+                                <p className="text-[11px] font-black text-[#65676B] uppercase tracking-widest mb-2">牌面依据</p>
+                                <p className="text-[14px] text-[#1C2B33] leading-normal">{e.card_basis}</p>
                               </div>
-                              <div className="bg-[#F9FBFF] p-4 rounded-2xl">
-                                <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mb-2">梦境依据</p>
-                                <p className="text-[14px] text-[#4A5578] leading-normal">{e.dream_basis}</p>
+                              <div className="bg-[#F7F8FA] p-4 rounded-2xl border border-black/5">
+                                <p className="text-[11px] font-black text-[#65676B] uppercase tracking-widest mb-2">梦境依据</p>
+                                <p className="text-[14px] text-[#1C2B33] leading-normal">{e.dream_basis}</p>
                               </div>
                             </div>
                           </div>
@@ -450,12 +474,12 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                     )}
 
                     {!!reading.advice?.length && (
-                      <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-[#2C3B77] to-[#1A1D2E] text-white">
+                      <div className="p-8 rounded-[2.5rem] bg-[#1C1E21] text-white border border-black/10">
                         <p className="text-sm font-black text-white/50 uppercase tracking-[0.3em] mb-6">Advice / 行动建议</p>
                         <div className="flex flex-wrap gap-3">
                           {reading.advice.map((advice, idx) => (
                             <div key={`share-advice-${idx}`} className="px-6 py-3 rounded-2xl bg-white/10 border border-white/10 text-lg font-bold flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-apple-blue" />
+                              <div className="w-2 h-2 rounded-full bg-[#47A5FA]" />
                               {advice}
                             </div>
                           ))}
@@ -466,19 +490,19 @@ export default function TarotView({ onBack, dreamText, emotion }: TarotViewProps
                 </>
               )}
 
-              <div className="mt-16 pt-8 border-t border-[#DEE6FF] flex justify-between items-center">
+              <div className="mt-16 pt-8 border-t border-[#CED0D4] flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-apple-blue flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-[#0064E0] flex items-center justify-center">
                     <span className="text-2xl">🌌</span>
                   </div>
                   <div>
-                    <p className="text-lg font-black text-[#1A1D2E] leading-none">梦境拓卜</p>
-                    <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-widest mt-1">Dream Topology v1.0</p>
+                    <p className="text-lg font-black text-[#050505] leading-none">梦境拓卜</p>
+                    <p className="text-[11px] font-black text-[#65676B] uppercase tracking-widest mt-1">Dream Topology v1.0</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] font-black text-[#6D78A8] uppercase tracking-[0.2em]">Captured on</p>
-                  <p className="text-sm font-bold text-[#1A1D2E] mt-1">{new Date().toLocaleDateString()}</p>
+                  <p className="text-[11px] font-black text-[#65676B] uppercase tracking-[0.2em]">Captured on</p>
+                  <p className="text-sm font-bold text-[#050505] mt-1">{new Date().toLocaleDateString()}</p>
                 </div>
               </div>
             </div>

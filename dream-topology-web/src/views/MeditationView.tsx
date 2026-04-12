@@ -69,7 +69,7 @@ export default function MeditationView({ onBack, title = "降噪冥想", type = 
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
       className="fixed inset-0 z-[60] bg-[#0A0A0C] text-white overflow-hidden flex flex-col"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-apple-purple/20 via-transparent to-apple-blue/20 opacity-50 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-apple-blue/18 via-transparent to-apple-blue/10 opacity-60 pointer-events-none" />
       
       <header className="flex items-center justify-between p-6 relative z-10">
         <button 
@@ -99,19 +99,19 @@ export default function MeditationView({ onBack, title = "降噪冥想", type = 
           <motion.div 
             animate={isPlaying ? phase : 'exhale'}
             variants={circleVariants}
-            className="absolute inset-0 rounded-full bg-apple-purple/20 blur-xl"
+            className="absolute inset-0 rounded-full bg-apple-blue/16 blur-xl"
           />
           <motion.div 
             animate={isPlaying ? phase : 'exhale'}
             variants={circleVariants}
-            className="absolute inset-4 rounded-full bg-apple-blue/30 blur-md"
+            className="absolute inset-4 rounded-full bg-apple-blue/22 blur-md"
           />
           
           {/* Inner circle */}
           <motion.div 
             animate={isPlaying ? phase : 'exhale'}
             variants={circleVariants}
-            className="absolute inset-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-blue shadow-[0_0_40px_rgba(147,51,234,0.5)] flex items-center justify-center z-10"
+            className="absolute inset-10 rounded-full bg-apple-blue shadow-[0_0_40px_rgba(0,100,224,0.42)] flex items-center justify-center z-10"
           >
             <AnimatePresence mode="wait">
               <motion.span 
@@ -134,7 +134,7 @@ export default function MeditationView({ onBack, title = "降噪冥想", type = 
 
         <button 
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+          className="w-16 h-16 rounded-full bg-white text-apple-blue flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.22)]"
         >
           {isPlaying ? <Pause size={24} className="fill-current" /> : <Play size={24} className="fill-current ml-1" />}
         </button>

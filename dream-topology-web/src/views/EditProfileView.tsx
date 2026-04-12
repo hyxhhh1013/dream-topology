@@ -4,8 +4,8 @@ import { ChevronLeft, Camera, User, Shield, Loader2, X, Check } from 'lucide-rea
 import { getUserStats } from '../services/api';
 
 export default function EditProfileView({ onBack }: { onBack: () => void }) {
-  const [username, setUsername] = useState('Dreamer_001');
-  const [email, setEmail] = useState('dreamer@example.com');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [signature, setSignature] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
@@ -143,10 +143,10 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-[60] bg-apple-gray-light dark:bg-apple-black overflow-y-auto"
+      className="fixed inset-0 z-[60] bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
       <div className="max-w-md mx-auto min-h-screen px-6 pt-12 pb-24 flex flex-col gap-6 relative">
-        <header className="flex justify-between items-center sticky top-0 bg-apple-gray-light/80 dark:bg-apple-black/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
+        <header className="flex justify-between items-center sticky top-0 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-xl z-10 py-4 -mx-6 px-6">
           <button 
             onClick={onBack}
             className="text-apple-blue font-medium transition-colors"
@@ -172,8 +172,8 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               title="更换头像"
             />
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-apple-blue to-apple-purple p-[2px] shadow-lg">
-              <div className="w-full h-full bg-white dark:bg-black rounded-full flex items-center justify-center transition-colors overflow-hidden">
+            <div className="w-24 h-24 rounded-full bg-[#E8F3FF] dark:bg-white/8 border border-black/10 dark:border-white/12 p-[2px] shadow-sm">
+              <div className="w-full h-full bg-white dark:bg-[#1C1E21] rounded-full flex items-center justify-center transition-colors overflow-hidden">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                 ) : (
@@ -181,7 +181,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
                 )}
               </div>
             </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-apple-blue rounded-full flex items-center justify-center text-white shadow-md border-2 border-apple-gray-light dark:border-apple-black pointer-events-none group-hover:scale-110 transition-transform">
+            <div className="absolute bottom-0 right-0 w-8 h-8 bg-[#0064E0] rounded-full flex items-center justify-center text-white shadow-md border-2 border-[#F0F2F5] dark:border-[#1C1E21] pointer-events-none group-hover:scale-110 transition-transform">
               <Camera size={14} />
             </div>
           </div>
@@ -191,23 +191,25 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
         </div>
 
         <section className="flex flex-col gap-4 mt-6">
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col transition-colors shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5">
-            <div className="flex items-center gap-3 p-4 border-b border-black/5 dark:border-white/5 transition-colors">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col transition-colors">
+            <div className="flex items-center gap-3 p-4 border-b border-black/5 dark:border-white/10 transition-colors">
               <span className="w-20 text-sm font-medium text-gray-500 dark:text-gray-400">用户名</span>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none"
+                placeholder="Dreamer_001"
+                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
-            <div className="flex items-center gap-3 p-4 border-b border-black/5 dark:border-white/5 transition-colors">
+            <div className="flex items-center gap-3 p-4 border-b border-black/5 dark:border-white/10 transition-colors">
               <span className="w-20 text-sm font-medium text-gray-500 dark:text-gray-400">邮箱</span>
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none"
+                placeholder="you@example.com"
+                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
             <div className="flex items-center gap-3 p-4 transition-colors">
@@ -217,16 +219,16 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
                 value={signature}
                 onChange={(e) => setSignature(e.target.value)}
                 placeholder="记录潜意识的探索者"
-                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none placeholder-gray-300 dark:placeholder-gray-600"
+                className="flex-1 bg-transparent border-none text-sm font-bold text-black dark:text-white focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
           </div>
 
           <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-4 pl-4 transition-colors">账户安全</h3>
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col transition-colors shadow-sm dark:shadow-none bg-white/80 dark:bg-transparent border border-black/5 dark:border-white/5">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col transition-colors">
             <button 
               onClick={() => setShowPasswordModal(true)}
-              className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 transition-colors active:bg-black/5 dark:active:bg-white/5 text-left w-full"
+              className="flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10 transition-colors active:bg-black/5 dark:active:bg-white/6 text-left w-full"
             >
               <div className="flex items-center gap-3">
                 <Shield size={18} className="text-apple-blue" />
@@ -236,7 +238,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
             </button>
             <button 
               onClick={handleDeleteAccount}
-              className="flex items-center justify-between p-4 transition-colors active:bg-black/5 dark:active:bg-white/5 text-left w-full"
+              className="flex items-center justify-between p-4 transition-colors active:bg-black/5 dark:active:bg-white/6 text-left w-full"
             >
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-red-500">注销账户</span>
@@ -260,13 +262,13 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full max-w-sm bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 shadow-2xl border border-black/5 dark:border-white/5"
+              className="w-full max-w-sm meta-card rounded-3xl p-6 shadow-2xl"
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">修改密码</h3>
                 <button 
                   onClick={() => setShowPasswordModal(false)}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14"
                 >
                   <X size={16} />
                 </button>
@@ -279,7 +281,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
                     type="password" 
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="输入当前密码"
                   />
                 </div>
@@ -289,7 +291,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
                     type="password" 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="设置新密码 (至少 6 位)"
                   />
                 </div>
@@ -299,7 +301,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
                     type="password" 
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="再次输入新密码"
                   />
                 </div>
@@ -307,7 +309,7 @@ export default function EditProfileView({ onBack }: { onBack: () => void }) {
 
               <button 
                 onClick={handleChangePassword}
-                className="w-full mt-8 py-3.5 bg-apple-blue text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-95"
+                className="meta-btn-primary w-full mt-8"
               >
                 <Check size={18} />
                 确认修改

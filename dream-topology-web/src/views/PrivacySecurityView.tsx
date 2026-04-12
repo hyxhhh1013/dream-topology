@@ -51,12 +51,12 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-50 bg-gray-50 dark:bg-black overflow-y-auto"
+      className="fixed inset-0 z-50 bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md px-6 py-4 flex items-center gap-4 border-b border-black/5 dark:border-white/5">
+      <div className="sticky top-0 z-10 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-md px-6 py-4 flex items-center gap-4 border-b border-black/5 dark:border-white/10">
         <button 
           onClick={onBack}
-          className="w-10 h-10 rounded-full bg-white dark:bg-white/10 flex items-center justify-center shadow-sm"
+          className="w-10 h-10 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center shadow-sm"
         >
           <ArrowLeft size={20} className="text-gray-900 dark:text-white" />
         </button>
@@ -64,8 +64,8 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
       </div>
 
       <div className="p-6 flex flex-col gap-6 pb-20">
-        <div className="glass-panel rounded-3xl p-6 flex flex-col items-center justify-center gap-3 text-center bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
-          <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-2">
+        <div className="meta-card rounded-3xl p-6 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="w-16 h-16 rounded-full bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 flex items-center justify-center text-apple-blue dark:text-white/90 mb-2">
             <Shield size={32} />
           </div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">您的数据安全至上</h3>
@@ -76,15 +76,15 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
 
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest pl-4">安全设置</h3>
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col">
             <PrivacyItem 
-              icon={<Lock size={20} className="text-blue-500" />}
+              icon={<Lock size={20} className="text-apple-blue" />}
               label="修改密码"
               hasArrow
               onClick={() => setShowPasswordModal(true)}
             />
             <PrivacyItem 
-              icon={<Key size={20} className="text-purple-500" />}
+              icon={<Key size={20} className="text-apple-blue" />}
               label="面容/指纹解锁"
               isToggle
               toggleState={biometricAuth}
@@ -95,7 +95,7 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
 
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest pl-4">隐私偏好</h3>
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col">
             <PrivacyItem 
               icon={<Eye size={20} className="text-orange-500" />}
               label="允许收集匿名分析数据"
@@ -103,10 +103,10 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
               toggleState={dataCollection}
               onToggle={setDataCollection}
             />
-            <div className="p-4 border-t border-black/5 dark:border-white/5">
+            <div className="p-4 border-t border-black/5 dark:border-white/10">
               <button 
                 onClick={handleClearData}
-                className="w-full py-3 rounded-xl border border-red-500/30 text-red-500 font-bold hover:bg-red-500/10 transition-colors"
+                className="w-full py-3 rounded-xl border border-red-500/30 text-red-600 font-bold hover:bg-red-500/10 transition-colors"
               >
                 清除所有本地数据
               </button>
@@ -129,13 +129,13 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="w-full max-w-sm bg-white dark:bg-[#1C1C1E] rounded-3xl p-6 shadow-2xl border border-black/5 dark:border-white/5"
+              className="w-full max-w-sm meta-card rounded-3xl p-6 shadow-2xl"
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">修改密码</h3>
                 <button 
                   onClick={() => setShowPasswordModal(false)}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="w-9 h-9 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 transition-colors hover:bg-white hover:dark:bg-white/14"
                 >
                   <X size={16} />
                 </button>
@@ -148,7 +148,7 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
                     type="password" 
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="输入当前密码"
                   />
                 </div>
@@ -158,7 +158,7 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
                     type="password" 
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="设置新密码 (至少 6 位)"
                   />
                 </div>
@@ -168,7 +168,7 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
                     type="password" 
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white outline-none transition-colors"
+                    className="meta-input text-sm"
                     placeholder="再次输入新密码"
                   />
                 </div>
@@ -176,7 +176,7 @@ export default function PrivacySecurityView({ onBack }: PrivacySecurityViewProps
 
               <button 
                 onClick={handleChangePassword}
-                className="w-full mt-8 py-3.5 bg-apple-blue text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-95"
+                className="meta-btn-primary w-full mt-8"
               >
                 <Check size={18} />
                 确认修改
@@ -209,10 +209,10 @@ function PrivacyItem({
   return (
     <div 
       onClick={isToggle && onToggle ? () => onToggle(!toggleState) : onClick}
-      className={`flex items-center justify-between p-4 border-b border-black/5 dark:border-white/5 last:border-0 transition-colors ${(onClick || (isToggle && onToggle)) ? 'cursor-pointer active:bg-black/5 dark:active:bg-white/5' : ''}`}
+      className={`flex items-center justify-between p-4 border-b border-black/5 dark:border-white/10 last:border-0 transition-colors ${(onClick || (isToggle && onToggle)) ? 'cursor-pointer active:bg-black/5 dark:active:bg-white/6' : ''}`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center transition-colors">
+        <div className="w-8 h-8 rounded-2xl bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 flex items-center justify-center transition-colors">
           {icon}
         </div>
         <span className="font-bold text-sm text-gray-900 dark:text-white transition-colors">{label}</span>

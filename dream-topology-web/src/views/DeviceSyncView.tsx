@@ -119,12 +119,12 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 z-50 bg-gray-50 dark:bg-black overflow-y-auto"
+      className="fixed inset-0 z-50 bg-[#F0F2F5] dark:bg-[#1C1E21] overflow-y-auto"
     >
-      <div className="sticky top-0 z-10 bg-gray-50/80 dark:bg-black/80 backdrop-blur-md px-6 py-4 flex items-center gap-4 border-b border-black/5 dark:border-white/5">
+      <div className="sticky top-0 z-10 bg-[#F0F2F5]/80 dark:bg-[#1C1E21]/80 backdrop-blur-md px-6 py-4 flex items-center gap-4 border-b border-black/5 dark:border-white/10">
         <button 
           onClick={onBack}
-          className="w-10 h-10 rounded-full bg-white dark:bg-white/10 flex items-center justify-center shadow-sm"
+          className="w-10 h-10 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center shadow-sm"
         >
           <ArrowLeft size={20} className="text-gray-900 dark:text-white" />
         </button>
@@ -140,8 +140,8 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
           </div>
         )}
 
-        <div className="glass-panel rounded-3xl p-6 flex flex-col items-center justify-center gap-3 text-center bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
-          <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-2">
+        <div className="meta-card rounded-3xl p-6 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="w-16 h-16 rounded-full bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 flex items-center justify-center text-apple-blue dark:text-white/90 mb-2">
             <Activity size={32} />
           </div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">多设备协同同步</h3>
@@ -152,7 +152,7 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
 
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest pl-4">健康平台接入</h3>
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col">
             <SyncItem 
               icon={<Apple size={20} className={healthSync ? "text-apple-blue transition-colors" : "text-gray-400 transition-colors"} />} 
               label="Apple Health (推荐)" 
@@ -194,7 +194,7 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
 
         <div className="flex flex-col gap-4">
           <h3 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest pl-4">其他数据源</h3>
-          <div className="glass-panel rounded-3xl overflow-hidden flex flex-col bg-white/90 dark:bg-white/5 border border-black/5 dark:border-white/5">
+          <div className="meta-card rounded-3xl overflow-hidden flex flex-col">
             <SyncItem 
               icon={<Smartphone size={20} className="text-gray-500" />} 
               label="环境噪音与温度监测" 
@@ -212,9 +212,9 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white dark:bg-gray-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-black/5 dark:border-white/10"
+            className="meta-card rounded-3xl p-6 w-full max-w-sm shadow-2xl"
           >
-            <div className="w-12 h-12 bg-apple-blue/10 text-apple-blue rounded-full flex items-center justify-center mb-4 mx-auto">
+            <div className="w-12 h-12 bg-[#E8F3FF] dark:bg-white/8 border border-black/5 dark:border-white/10 text-apple-blue dark:text-white/90 rounded-full flex items-center justify-center mb-4 mx-auto">
               <Apple size={24} />
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">连接 Apple Health</h3>
@@ -223,14 +223,14 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
             </p>
             
             <div className="space-y-3 mb-6">
-              <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200">
+              <button className="w-full flex items-center justify-between p-3 bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200">
                 <div className="flex items-center gap-2">
                   <Download size={16} className="text-apple-blue" />
                   <span>1. 获取 "梦境拓卜同步" 快捷指令</span>
                 </div>
                 <Link2 size={16} className="text-gray-400" />
               </button>
-              <div className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200">
+              <div className="p-3 bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200">
                 <div className="flex items-center gap-2 mb-1">
                   <Activity size={16} className="text-apple-blue" />
                   <span>2. 运行指令完成数据回填</span>
@@ -242,13 +242,13 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowShortcutModal(false)}
-                className="flex-1 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5"
+                className="flex-1 py-3 rounded-xl font-bold text-gray-700 dark:text-white/90 bg-[#F1F4F7] dark:bg-white/8 border border-black/10 dark:border-white/12 hover:bg-white hover:dark:bg-white/12 transition-colors"
               >
                 取消
               </button>
               <button 
                 onClick={simulateShortcutTrigger}
-                className="flex-1 py-3 rounded-xl font-bold text-white bg-apple-blue shadow-lg shadow-apple-blue/30"
+                className="meta-btn-primary flex-1"
               >
                 模拟已运行
               </button>
