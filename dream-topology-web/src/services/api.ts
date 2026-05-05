@@ -1,17 +1,24 @@
+import { STORAGE_KEYS } from '../config/constants';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
-function getOrCreateAnonymousUserId(): string {
-  const key = 'dream_topology_anonymous_user_id';
-  const existing = localStorage.getItem(key);
-  if (existing && existing.trim()) return existing;
-  const generated = `anon_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-  localStorage.setItem(key, generated);
-  return generated;
+// ===================== JWT Token Management =====================
+
+function getStoredToken(): string | null {
+  return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 }
 
-function getActiveUserId(): string {
+export function setAuthToken(token: string): void {
+  localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+}
+
+export function clearAuthToken(): void {
+  localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+}
+
+export function getActiveUserId(): string {
   try {
-    const userStr = localStorage.getItem('dream_topology_current_user');
+    const userStr = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     if (userStr) {
       const user = JSON.parse(userStr);
       if (user?.id) return String(user.id);
@@ -22,16 +29,35 @@ function getActiveUserId(): string {
   return getOrCreateAnonymousUserId();
 }
 
+function getOrCreateAnonymousUserId(): string {
+  const existing = localStorage.getItem(STORAGE_KEYS.ANONYMOUS_USER_ID);
+  if (existing && existing.trim()) return existing;
+  const generated = `anon_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(STORAGE_KEYS.ANONYMOUS_USER_ID, generated);
+  return generated;
+}
+
 // Helper to get headers with stable user identity
 function getHeaders() {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
   };
+
+  // Add JWT Authorization header if available
+  const token = getStoredToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Add legacy header-based user identification for backward compatibility
   const activeUserId = getActiveUserId();
   headers['x-user-id'] = activeUserId;
   headers['x-anon-id'] = getOrCreateAnonymousUserId();
+
   return headers;
 }
+
+// ===================== API Interfaces =====================
 
 export interface DreamSymbol {
   name: string;
@@ -62,6 +88,8 @@ export interface AnalyzeResponse {
   };
   immersive_reflection?: string;
   overall_archetype?: string;
+  dreamRecordId?: string | null;
+  topology?: any;
 }
 
 export interface MatchResponse {
@@ -111,6 +139,73 @@ export interface TarotFavorite {
   created_at: string;
 }
 
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      name: string | null;
+      created_at: string;
+    };
+    token: string;
+  };
+}
+
+// ===================== Auth API =====================
+
+export async function registerUser(email: string, password: string, name: string): Promise<AuthResponse['data']> {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, name }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Registration failed');
+  }
+
+  const data = await response.json();
+  // Automatically store the token
+  setAuthToken(data.data.token);
+  return data.data;
+}
+
+export async function loginUser(email: string, password: string): Promise<AuthResponse['data']> {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Login failed');
+  }
+
+  const data = await response.json();
+  // Automatically store the token
+  setAuthToken(data.data.token);
+  return data.data;
+}
+
+export async function fetchCurrentUser(): Promise<{ id: string; email: string; name: string | null }> {
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: 'GET',
+    headers: getHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch current user');
+  }
+
+  const data = await response.json();
+  return data.data;
+}
+
+// ===================== Dream Analysis API =====================
+
 /**
  * 1. 语义解构 API：提取梦境符号与情绪，支持传入生理数据进行交叉验证
  */
@@ -124,12 +219,12 @@ export async function analyzeDream(
     headers: getHeaders(),
     body: JSON.stringify({ dreamText, physiologicalData, mode })
   });
-  
+
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to analyze dream');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -143,11 +238,11 @@ export async function embedDream(dreamText: string, dreamId?: string): Promise<n
     headers: getHeaders(),
     body: JSON.stringify({ dreamText, dreamId })
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to generate embedding');
   }
-  
+
   const data = await response.json();
   return data.data.embedding;
 }
@@ -161,11 +256,11 @@ export async function findSimilarDreams(targetEmbedding: number[], topK: number 
     headers: getHeaders(),
     body: JSON.stringify({ targetEmbedding, topK })
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to find similar dreams');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -179,11 +274,11 @@ export async function generateDreamImage(prompt: string, dreamId?: string, style
     headers: getHeaders(),
     body: JSON.stringify({ prompt, dreamId, style })
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to generate dream image');
   }
-  
+
   const data = await response.json();
   return data.data.imageUrl;
 }
@@ -196,11 +291,11 @@ export async function fetchDreamSymbols(): Promise<{id: string, name: string, un
     method: 'GET',
     headers: getHeaders()
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch dream symbols');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -212,17 +307,17 @@ export async function syncOSHealthData(mockData?: any): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/health/os/sync`, {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify(mockData || { 
-      heart_rate: 68, 
+    body: JSON.stringify(mockData || {
+      heart_rate: 68,
       sleep_duration: 7.5,
       device_name: 'Apple Health (Web Trigger Mock)'
     })
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to sync OS health data');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -235,11 +330,11 @@ export async function getHuaweiAuthUrl(): Promise<{url: string | null, message: 
     method: 'GET',
     headers: getHeaders()
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to get Huawei auth url');
   }
-  
+
   const data = await response.json();
   return { url: data.url, message: data.message };
 }
@@ -253,11 +348,11 @@ export async function syncHuaweiHealthData(): Promise<any> {
     headers: getHeaders(),
     body: JSON.stringify({})
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to sync Huawei health data');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -270,11 +365,11 @@ export async function getXiaomiAuthUrl(): Promise<{url: string | null, message: 
     method: 'GET',
     headers: getHeaders()
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to get auth url');
   }
-  
+
   const data = await response.json();
   return { url: data.url, message: data.message };
 }
@@ -288,11 +383,11 @@ export async function syncXiaomiHealthData(): Promise<any> {
     headers: getHeaders(),
     body: JSON.stringify({})
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to sync health data');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -305,11 +400,11 @@ export async function getUserStats(): Promise<{dreamCount: number, username: str
     method: 'GET',
     headers: getHeaders()
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch user stats');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
@@ -322,25 +417,23 @@ export async function getUserDreams(): Promise<any[]> {
     method: 'GET',
     headers: getHeaders()
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch user dreams');
   }
-  
+
   const data = await response.json();
   return data.data;
 }
 
 /**
  * 10. 获取用户当前地理位置的实时温度 (调用免费的天气 API)
- * 注意：为了黑客松演示的稳定性，如果 API 调用失败或用户拒绝定位，将返回一个合理的 mock 值。
  */
 export async function fetchLocalTemperature(): Promise<number> {
   return new Promise((resolve) => {
-    // 1. 获取地理位置
     if (!navigator.geolocation) {
       console.warn("Geolocation is not supported by this browser.");
-      resolve(24.5); // Fallback mock temp
+      resolve(24.5);
       return;
     }
 
@@ -348,26 +441,24 @@ export async function fetchLocalTemperature(): Promise<number> {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          // 2. 调用免费的 Open-Meteo API 获取实时温度
-          // 不需要 API Key，非常适合黑客松
           const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-          
+
           if (!response.ok) {
             throw new Error('Weather API error');
           }
-          
+
           const data = await response.json();
           resolve(data.current_weather.temperature);
         } catch (error) {
           console.error("Error fetching weather:", error);
-          resolve(25.0); // Fallback on network error
+          resolve(25.0);
         }
       },
       (error) => {
         console.warn("Geolocation error or denied:", error.message);
-        resolve(23.5); // Fallback on permission denied
+        resolve(23.5);
       },
-      { timeout: 5000 } // Don't hang forever
+      { timeout: 5000 }
     );
   });
 }

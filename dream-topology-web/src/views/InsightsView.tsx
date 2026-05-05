@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, TrendingUp, Sparkles, ChevronRight, CalendarDays, X } from 'lucide-react';
+import { BookOpen, TrendingUp, Sparkles, ChevronRight, CalendarDays, X, Search, Filter } from 'lucide-react';
 import SymbolDictionaryView from './SymbolDictionaryView';
 import JournalDetailView from './JournalDetailView';
 import DreamCalendarView from './DreamCalendarView';
@@ -19,6 +19,32 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
   const [isLoadingDreams, setIsLoadingDreams] = useState(true);
 
   const [recentSymbols, setRecentSymbols] = useState<any[]>([]);
+  // Search & filter state for journal tab
+  const [searchQuery, setSearchQuery] = useState('');
+  const [emotionFilter, setEmotionFilter] = useState<string>('all');
+
+  const filteredDreams = useMemo(() => {
+    let result = allDreams;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(d =>
+        (d.title && d.title.toLowerCase().includes(q)) ||
+        (d.content && d.content.toLowerCase().includes(q)) ||
+        (d.tags && d.tags.some((t: string) => t.toLowerCase().includes(q)))
+      );
+    }
+    if (emotionFilter !== 'all') {
+      result = result.filter(d => d.emotion === emotionFilter);
+    }
+    return result;
+  }, [allDreams, searchQuery, emotionFilter]);
+
+  const archetypeConfidence = dreamData?.analysis?.scientific_basis?.confidence;
+  const archetypeConfidencePct = (() => {
+    if (typeof archetypeConfidence !== 'number' || Number.isNaN(archetypeConfidence)) return undefined;
+    const raw = archetypeConfidence <= 1 ? archetypeConfidence * 100 : archetypeConfidence;
+    return Math.max(0, Math.min(100, Math.round(raw)));
+  })();
 
   // Fetch all dreams for the list view
   useEffect(() => {
@@ -281,14 +307,53 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
             transition={{ duration: 0.3 }}
             className="flex flex-col gap-3 sm:gap-4"
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white transition-colors">所有记录</h2>
-              <button 
-                onClick={() => setShowCalendar(true)}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-700 dark:text-white hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
-              >
-                <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white transition-colors">所有记录</h2>
+                <button
+                  onClick={() => setShowCalendar(true)}
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/75 dark:bg-white/10 border border-black/10 dark:border-white/12 backdrop-blur flex items-center justify-center text-gray-700 dark:text-white/90 hover:bg-white hover:dark:bg-white/14 transition-colors"
+                >
+                  <CalendarDays className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+              </div>
+              {/* Search & Filter Bar */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="搜索梦境标题、内容或标签..."
+                    className="w-full text-xs sm:text-sm font-medium text-gray-900 dark:text-white bg-white/75 dark:bg-white/8 border border-black/10 dark:border-white/12 rounded-xl pl-8 pr-3 py-2 outline-none focus:ring-2 focus:ring-apple-blue/30 transition-all placeholder:text-gray-400"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <select
+                    value={emotionFilter}
+                    onChange={e => setEmotionFilter(e.target.value)}
+                    className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/75 dark:bg-white/8 border border-black/10 dark:border-white/12 rounded-xl pl-8 pr-3 py-2 outline-none focus:ring-2 focus:ring-apple-blue/30 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="all">全部情绪</option>
+                    <option value="anxious">焦虑</option>
+                    <option value="fear">恐惧</option>
+                    <option value="stress">压力</option>
+                    <option value="peace">平静</option>
+                    <option value="neutral">中性</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             </div>
 
             {/* 日记列表项 */}
@@ -297,8 +362,8 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                 <div className="col-span-1 md:col-span-2 py-8 flex justify-center text-gray-500 text-xs sm:text-sm">
                   加载中...
                 </div>
-              ) : allDreams.length > 0 ? (
-                allDreams.map((dream) => (
+              ) : filteredDreams.length > 0 ? (
+                filteredDreams.map((dream) => (
                   <JournalCard 
                     key={dream.id}
                     date={dream.date === "今天" ? "今天" : dream.date.substring(5, 10).replace('-', '月') + '日'}
@@ -320,7 +385,7 @@ export default function InsightsView({ dreamData }: { dreamData?: any }) {
                 ))
               ) : (
                 <div className="col-span-1 md:col-span-2 py-8 flex justify-center text-gray-500 text-xs sm:text-sm">
-                  暂无梦境记录
+                  {searchQuery || emotionFilter !== 'all' ? '没有匹配的梦境记录' : '暂无梦境记录'}
                 </div>
               )}
             </div>

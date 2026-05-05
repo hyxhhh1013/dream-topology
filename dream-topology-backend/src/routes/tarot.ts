@@ -1,16 +1,16 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { OpenAI } from 'openai';
-import * as dotenv from 'dotenv';
 import { prisma } from '../index';
-
-dotenv.config();
+import { config } from '../lib/config';
+import { getUserId } from '../middleware/auth';
+import { ValidationError } from '../lib/errors';
 
 const tarotRouter = new Hono();
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL,
+  apiKey: config.OPENAI_API_KEY,
+  baseURL: config.OPENAI_BASE_URL,
 });
 
 type TarotCardSeed = {
@@ -53,14 +53,6 @@ const drawSchema = z.object({
   spreadType: z.literal('three_card').optional(),
 });
 
-function getUserId(c: any): string {
-  const headerUserId = c.req.header('x-user-id')?.trim();
-  if (headerUserId) return headerUserId;
-  const anonId = c.req.header('x-anon-id')?.trim();
-  if (anonId) return anonId;
-  return `anon_${Date.now()}`;
-}
-
 async function ensureUser(userId: string) {
   let user = await prisma.user.findFirst({ where: { id: userId } });
   if (!user) {
@@ -98,7 +90,7 @@ function buildTarotPrompt(cards: Array<TarotCardSeed & { is_reversed: boolean; p
     .join('\n');
 
   return `
-你是一位“神秘叙事 + 心理落地”风格的塔罗顾问。请基于三张牌阵给出中文解读。
+你是一位"神秘叙事 + 心理落地"风格的塔罗顾问。请基于三张牌阵给出中文解读。
 
 输出必须是 JSON，字段如下：
 {
@@ -118,7 +110,7 @@ function buildTarotPrompt(cards: Array<TarotCardSeed & { is_reversed: boolean; p
 1) 语气前半带神秘感，后半给可执行建议。
 2) 不要制造恐吓，不给绝对命运结论。
 3) 建议务实具体，每条 18-40 字，且能当天执行。
-4) interpretation 中必须显式提到“过去/现在/未来”三张牌各自对结论的贡献。
+4) interpretation 中必须显式提到"过去/现在/未来"三张牌各自对结论的贡献。
 5) evidence 至少 2 条，每条都要写清楚牌面依据。
 
 梦境文本：${dreamText || '未提供'}
@@ -150,7 +142,7 @@ tarotRouter.post('/draw', async (c) => {
     const body = await c.req.json();
     const parsed = drawSchema.safeParse(body);
     if (!parsed.success) {
-      return c.json({ success: false, message: 'Invalid input', details: parsed.error.issues }, 400);
+      throw new ValidationError('Invalid input', parsed.error.issues);
     }
 
     const { dreamText, emotion, question, spreadType } = parsed.data;
@@ -165,16 +157,17 @@ tarotRouter.post('/draw', async (c) => {
     let evidence: Array<{ point: string; card_basis: string; dream_basis: string }> = [];
 
     try {
+      const options: any = {
+        model: config.AI_CHAT_MODEL,
+        messages: [
+          { role: 'system', content: '你是专业塔罗顾问，请严格返回 JSON。' },
+          { role: 'user', content: prompt },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.6,
+      };
       const response = await withTimeout(
-        openai.chat.completions.create({
-          model: 'deepseek-chat',
-          messages: [
-            { role: 'system', content: '你是专业塔罗顾问，请严格返回 JSON。' },
-            { role: 'user', content: prompt },
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.6,
-        }),
+        openai.chat.completions.create(options),
         15000
       );
       const content = response.choices[0]?.message?.content;
@@ -246,7 +239,7 @@ tarotRouter.get('/history', async (c) => {
 
     return c.json({
       success: true,
-      data: readings.map((r) => ({
+      data: readings.map((r: any) => ({
         ...r,
         advice: (() => {
           try {

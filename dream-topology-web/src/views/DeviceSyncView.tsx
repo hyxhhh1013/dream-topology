@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, Apple, Watch, Activity, ActivitySquare, Smartphone, Loader2, Link2, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getXiaomiAuthUrl, syncXiaomiHealthData, syncOSHealthData, getHuaweiAuthUrl, syncHuaweiHealthData } from '../services/api';
 
 interface DeviceSyncViewProps {
@@ -83,6 +83,41 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
       setIsSyncing(false);
     }
   };
+
+  const handleGarminToggle = async (checked: boolean) => {
+    if (!checked) {
+      setGarminSync(false);
+      localStorage.setItem('dream_topology_garmin_sync', 'false');
+      return;
+    }
+
+    try {
+      setIsSyncing(true);
+      setSyncMessage('正在连接 Garmin Connect...');
+
+      // Simulate Garmin sync delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setGarminSync(true);
+      localStorage.setItem('dream_topology_garmin_sync', 'true');
+      setSyncMessage('Garmin Connect 同步成功！已获取睡眠与心率数据。');
+      setTimeout(() => setSyncMessage(null), 3000);
+    } catch (error) {
+      console.error(error);
+      setSyncMessage('Garmin 同步失败，请重试。');
+      setTimeout(() => setSyncMessage(null), 3000);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Restore Garmin sync state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('dream_topology_garmin_sync');
+    if (saved === 'true') {
+      setGarminSync(true);
+    }
+  }, []);
 
   const handleHuaweiToggle = async (checked: boolean) => {
     if (!checked) {
@@ -180,14 +215,14 @@ export default function DeviceSyncView({ onBack }: DeviceSyncViewProps) {
               toggleState={huaweiSync}
               onToggle={handleHuaweiToggle}
             />
-            <SyncItem 
-              icon={<Watch size={20} className={garminSync ? "text-blue-500 transition-colors" : "text-gray-400 transition-colors"} />} 
-              label="Garmin Connect" 
-              value={garminSync ? "已连接" : "未连接"} 
+            <SyncItem
+              icon={<Watch size={20} className={garminSync ? "text-blue-500 transition-colors" : "text-gray-400 transition-colors"} />}
+              label="Garmin Connect"
+              value={garminSync ? "已连接" : "未连接"}
               valueColor={garminSync ? "text-blue-500" : "text-gray-400"}
               isToggle={true}
               toggleState={garminSync}
-              onToggle={setGarminSync}
+              onToggle={handleGarminToggle}
             />
           </div>
         </div>

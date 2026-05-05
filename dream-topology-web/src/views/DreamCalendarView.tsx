@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronRight as ChevronRightIcon, Plus, X } from 'lucide-react';
 import { getUserDreams } from '../services/api';
 
 interface DreamCalendarProps {
@@ -73,6 +73,89 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
+  // Manual entry modal state
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualTitle, setManualTitle] = useState('');
+  const [manualContent, setManualContent] = useState('');
+  const [manualEmotion, setManualEmotion] = useState('neutral');
+  const [manualSaving, setManualSaving] = useState(false);
+
+  const emotionOptions = [
+    { value: 'peace', label: '平静', color: 'bg-apple-blue' },
+    { value: 'neutral', label: '中性', color: 'bg-gray-400' },
+    { value: 'anxious', label: '焦虑', color: 'bg-purple-500' },
+    { value: 'stress', label: '压力', color: 'bg-orange-500' },
+    { value: 'fear', label: '恐惧', color: 'bg-red-500' },
+  ];
+
+  const handleOpenManualEntry = useCallback(() => {
+    setManualTitle('');
+    setManualContent('');
+    setManualEmotion('neutral');
+    setShowManualEntry(true);
+  }, []);
+
+  const handleSaveManualEntry = useCallback(async () => {
+    if (!manualTitle.trim() || !manualContent.trim()) return;
+
+    setManualSaving(true);
+    // Store in localStorage so it persists
+    try {
+      const key = `dream_topology_manual_${currentYear}_${currentMonth + 1}_${selectedDate}`;
+      const existing = localStorage.getItem(key);
+      const entries = existing ? JSON.parse(existing) : [];
+      const newEntry = {
+        id: `manual_${Date.now()}`,
+        title: manualTitle.trim(),
+        content: manualContent.trim(),
+        emotion: manualEmotion,
+        tags: ['手动补录'],
+        time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+        date: `${currentYear}年${currentMonth + 1}月${selectedDate}日`,
+      };
+      entries.push(newEntry);
+      localStorage.setItem(key, JSON.stringify(entries));
+
+      // Also merge into dreamsData for current view
+      setDreamsData(prev => {
+        const day = selectedDate;
+        const existingDay = prev[day] || [];
+        return { ...prev, [day]: [...existingDay, newEntry] };
+      });
+
+      setShowManualEntry(false);
+    } catch (e) {
+      console.error('Failed to save manual entry', e);
+    } finally {
+      setManualSaving(false);
+    }
+  }, [manualTitle, manualContent, manualEmotion, currentYear, currentMonth, selectedDate]);
+
+  // Load manual entries from localStorage on mount/month change
+  useEffect(() => {
+    const prefix = `dream_topology_manual_${currentYear}_${currentMonth + 1}_`;
+    try {
+      for (let d = 1; d <= daysInMonth; d++) {
+        const key = prefix + d;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const entries = JSON.parse(raw);
+          if (entries.length > 0) {
+            setDreamsData(prev => {
+              if (prev[d]?.some((e: any) => e.id?.startsWith('manual_'))) {
+                return prev; // already loaded
+              }
+              const existingDay = prev[d] || [];
+              return { ...prev, [d]: [...existingDay, ...entries] };
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load manual entries', e);
+    }
+  }, [currentYear, currentMonth, daysInMonth]);
+
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
   const emotionColors: Record<string, string> = {
@@ -220,13 +303,111 @@ export default function DreamCalendarView({ onBack, onSelectJournal }: DreamCale
                 <CalendarIcon size={20} />
               </div>
               <p className="text-sm font-bold text-gray-500 dark:text-gray-400">这一天没有捕获到梦境</p>
-              <button className="text-xs font-bold text-apple-blue mt-1 hover:opacity-80 transition-opacity">
+              <button
+                onClick={handleOpenManualEntry}
+                className="text-xs font-bold text-apple-blue mt-1 hover:opacity-80 transition-opacity"
+              >
                 手动补录记录
               </button>
             </motion.div>
           )}
         </section>
       </div>
+
+      {/* Manual Entry Modal */}
+      <AnimatePresence>
+        {showManualEntry && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="meta-card rounded-3xl p-6 w-full max-w-sm shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">手动补录梦境</h3>
+                <button
+                  onClick={() => setShowManualEntry(false)}
+                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-gray-500"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+                    日期
+                  </label>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 rounded-xl px-4 py-2.5">
+                    {currentYear}年{currentMonth + 1}月{selectedDate}日
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+                    梦境标题
+                  </label>
+                  <input
+                    type="text"
+                    value={manualTitle}
+                    onChange={e => setManualTitle(e.target.value)}
+                    placeholder="给梦境起个名字..."
+                    className="w-full text-sm font-medium text-gray-900 dark:text-white bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-apple-blue/30 transition-all placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+                    梦境内容
+                  </label>
+                  <textarea
+                    value={manualContent}
+                    onChange={e => setManualContent(e.target.value)}
+                    placeholder="描述你梦到了什么..."
+                    rows={4}
+                    className="w-full text-sm font-medium text-gray-900 dark:text-white bg-[#F7F8FA] dark:bg-white/6 border border-black/5 dark:border-white/10 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-apple-blue/30 transition-all placeholder:text-gray-400 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">
+                    情绪标签
+                  </label>
+                  <div className="flex gap-2">
+                    {emotionOptions.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setManualEmotion(opt.value)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                          manualEmotion === opt.value
+                            ? `${opt.color} text-white shadow-md scale-105`
+                            : 'bg-[#F7F8FA] dark:bg-white/6 text-gray-600 dark:text-gray-400 border border-black/5 dark:border-white/10'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleSaveManualEntry}
+                  disabled={!manualTitle.trim() || !manualContent.trim() || manualSaving}
+                  className="meta-btn-primary w-full mt-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {manualSaving ? '保存中...' : '保存记录'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

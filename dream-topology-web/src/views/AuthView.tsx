@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Lock, User as UserIcon, ArrowRight, Loader2 } from 'lucide-react';
+import { registerUser, loginUser, setAuthToken } from '../services/api';
 
 interface AuthViewProps {
   onClose: () => void;
@@ -17,10 +18,10 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    
+
     if (!email || !password || (!isLoginMode && !name)) {
       setErrorMsg('请填写所有必填字段');
       return;
@@ -28,53 +29,43 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
 
     setIsLoading(true);
 
-    // Simulate network request
-    setTimeout(() => {
-      try {
-        const usersDB = JSON.parse(localStorage.getItem('dream_topology_users') || '{}');
-
-        if (isLoginMode) {
-          // Login Logic
-          const user = usersDB[email];
-          if (user && user.password === password) {
-            onSuccess({ email: user.email, username: user.name, id: user.id });
-          } else {
-            setErrorMsg('邮箱或密码不正确');
-          }
-        } else {
-          // Register Logic
-          if (usersDB[email]) {
-            setErrorMsg('该邮箱已被注册');
-          } else {
-            const newUser = {
-              id: `user_${Date.now()}`,
-              email,
-              name,
-              password,
-              createdAt: new Date().toISOString(),
-              dreamCount: 0 // Initialize specific user data
-            };
-            usersDB[email] = newUser;
-            localStorage.setItem('dream_topology_users', JSON.stringify(usersDB));
-            onSuccess({ email: newUser.email, username: newUser.name, id: newUser.id });
-          }
-        }
-      } catch (err) {
-        setErrorMsg('系统错误，请重试');
-      } finally {
-        setIsLoading(false);
+    try {
+      let result;
+      if (isLoginMode) {
+        // Real login via backend API
+        result = await loginUser(email, password);
+      } else {
+        // Real register via backend API
+        result = await registerUser(email, password, name);
       }
-    }, 800);
+
+      // Store user info in localStorage for legacy compatibility
+      const userData = {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        token: result.token,
+      };
+      localStorage.setItem('dream_topology_current_user', JSON.stringify(userData));
+
+      // Auth token is already stored by setAuthToken in registerUser/loginUser
+
+      onSuccess({ email: result.user.email, username: result.user.name, id: result.user.id, token: result.token });
+    } catch (err: any) {
+      setErrorMsg(err.message || '认证失败，请重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
     >
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -82,7 +73,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
       >
         {/* Header */}
         <div className="relative p-6 pb-2 text-center">
-          <button 
+          <button
             onClick={onClose}
             className="absolute right-4 top-4 p-2 rounded-full bg-black/5 dark:bg-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
@@ -112,9 +103,9 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <UserIcon size={18} className="text-gray-400" />
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="用户名 (如: Dreamer_001)" 
+                <input
+                  type="text"
+                  placeholder="用户名 (如: Dreamer_001)"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
@@ -127,9 +118,9 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <Mail size={18} className="text-gray-400" />
             </div>
-            <input 
-              type="email" 
-              placeholder="电子邮箱" 
+            <input
+              type="email"
+              placeholder="电子邮箱"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
@@ -140,9 +131,9 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <Lock size={18} className="text-gray-400" />
             </div>
-            <input 
-              type="password" 
-              placeholder="密码" 
+            <input
+              type="password"
+              placeholder="密码"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-apple-blue/50 rounded-xl py-3.5 pl-11 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/20 transition-all placeholder-gray-500"
@@ -150,16 +141,16 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
           </div>
 
           {errorMsg && (
-            <motion.p 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="text-xs text-red-500 font-medium text-center"
             >
               {errorMsg}
             </motion.p>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-apple-blue to-apple-purple text-white font-bold text-sm shadow-lg shadow-apple-blue/30 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-70"
@@ -177,7 +168,7 @@ export default function AuthView({ onClose, onSuccess }: AuthViewProps) {
         <div className="p-6 pt-0 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             {isLoginMode ? '还没有潜意识档案？' : '已拥有档案？'}
-            <button 
+            <button
               type="button"
               onClick={() => {
                 setIsLoginMode(!isLoginMode);

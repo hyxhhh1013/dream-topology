@@ -42,11 +42,10 @@ export class DreamService {
     });
 
     // 2. Calculate similarity in memory
-    const dreamsWithSimilarity = allDreams.map(dream => {
-      // Parse the JSON string back to an array
+    const dreamsWithSimilarity = allDreams.map((dream: { content_embedding: string | null; id: string; content: string; emotion: string; vividness: number; recorded_at: Date }) => {
       const embedding = JSON.parse(dream.content_embedding as string) as number[];
       const similarity = cosineSimilarity(targetEmbedding, embedding);
-      
+
       return {
         id: dream.id,
         content: dream.content,
@@ -58,7 +57,7 @@ export class DreamService {
     });
 
     // 3. Sort by highest similarity and limit
-    dreamsWithSimilarity.sort((a, b) => b.similarity - a.similarity);
+    dreamsWithSimilarity.sort((a: { similarity: number }, b: { similarity: number }) => b.similarity - a.similarity);
     return dreamsWithSimilarity.slice(0, limit);
   }
 
@@ -70,7 +69,6 @@ export class DreamService {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Fetch dream records in the last 30 days
     const dreams = await prisma.dreamRecord.findMany({
       where: {
         user_id: userId,
@@ -87,12 +85,10 @@ export class DreamService {
       }
     });
 
-    // Process and format the data for the frontend TopologyView
     const nodes: any[] = [];
     const links: any[] = [];
 
-    dreams.forEach(dream => {
-      // Add Dream Node
+    dreams.forEach((dream: any) => {
       nodes.push({
         id: dream.id,
         type: 'dream',
@@ -100,8 +96,7 @@ export class DreamService {
         data: { emotion: dream.emotion, vividness: dream.vividness }
       });
 
-      // Add Symbol Nodes & Links
-      dream.dream_symbols.forEach(ds => {
+      dream.dream_symbols.forEach((ds: any) => {
         nodes.push({
           id: ds.dream_symbol.id,
           type: 'symbol',
@@ -116,8 +111,7 @@ export class DreamService {
         });
       });
 
-      // Add Dream-to-Dream Edges
-      dream.source_edges.forEach(edge => {
+      dream.source_edges.forEach((edge: any) => {
         links.push({
           source: edge.source_id,
           target: edge.target_id,
@@ -128,19 +122,15 @@ export class DreamService {
       });
     });
 
-    // Deduplicate symbol nodes (as multiple dreams may share the same symbol)
-    const uniqueNodes = Array.from(new Map(nodes.map(n => [n.id, n])).values());
+    const uniqueNodes = Array.from(new Map(nodes.map((n: any) => [n.id, n])).values());
 
     return { nodes: uniqueNodes, links };
   }
 
   /**
    * 3. 日历热力图聚合查询 (SQLite Memory Aggregation Fallback)
-   * 按天高效聚合查询用户的梦境数量、平均心率、主导情绪，用于渲染 DreamCalendarView。
    */
   async getCalendarHeatmap(userId: string, startDate: Date, endDate: Date) {
-    // SQLite doesn't support advanced aggregations like MODE() easily via queryRaw.
-    // For local demo, we fetch the raw data and aggregate in memory.
     const records = await prisma.dreamRecord.findMany({
       where: {
         user_id: userId,
@@ -157,10 +147,9 @@ export class DreamService {
 
     const dailyStats = new Map<string, any>();
 
-    records.forEach(record => {
-      // Extract just the date part (YYYY-MM-DD)
+    records.forEach((record: any) => {
       const dateStr = record.recorded_at.toISOString().split('T')[0];
-      
+
       if (!dailyStats.has(dateStr)) {
         dailyStats.set(dateStr, {
           dream_date: dateStr,
@@ -173,19 +162,17 @@ export class DreamService {
       const stats = dailyStats.get(dateStr);
       stats.dream_count += 1;
       stats.emotions.push(record.emotion);
-      
+
       if (record.physiological_data?.rem_heart_rate) {
         stats.heart_rates.push(record.physiological_data.rem_heart_rate);
       }
     });
 
-    // Finalize aggregations
-    const result = Array.from(dailyStats.values()).map(stats => {
-      // Calculate MODE for emotion
-      const emotionCounts = stats.emotions.reduce((acc: any, curr: string) => {
+    const result = Array.from(dailyStats.values()).map((stats: any) => {
+      const emotionCounts = (stats.emotions as string[]).reduce((acc: Record<string, number>, curr: string) => {
         acc[curr] = (acc[curr] || 0) + 1;
         return acc;
-      }, {});
+      }, {} as Record<string, number>);
       let dominant_emotion = null;
       let maxCount = 0;
       for (const [emotion, count] of Object.entries(emotionCounts)) {
@@ -195,7 +182,6 @@ export class DreamService {
         }
       }
 
-      // Calculate AVG for heart rate
       const avg_rem_heart_rate = stats.heart_rates.length > 0
         ? stats.heart_rates.reduce((a: number, b: number) => a + b, 0) / stats.heart_rates.length
         : null;
@@ -208,7 +194,6 @@ export class DreamService {
       };
     });
 
-    // Sort by date ascending
-    return result.sort((a, b) => a.dream_date.localeCompare(b.dream_date));
+    return result.sort((a: { dream_date: string }, b: { dream_date: string }) => a.dream_date.localeCompare(b.dream_date));
   }
 }
